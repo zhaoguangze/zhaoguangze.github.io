@@ -5,28 +5,28 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>http://www.zhaoguangze.com/</loc>
-<lastmod>2016-01-03T17:29:20-00:00</lastmod>
+<lastmod>2016-01-06T11:34:51-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
 
 <url>
 <loc>http://www.zhaoguangze.com/archives.html</loc>
-<lastmod>2016-01-03T17:29:20-00:00</lastmod>
+<lastmod>2016-01-06T11:34:51-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
 
 <url>
 <loc>http://www.zhaoguangze.com/tags.html</loc>
-<lastmod>2016-01-03T17:29:20-00:00</lastmod>
+<lastmod>2016-01-06T11:34:51-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
 
 <url>
 <loc>http://www.zhaoguangze.com/categories.html</loc>
-<lastmod>2016-01-03T17:29:20-00:00</lastmod>
+<lastmod>2016-01-06T11:34:51-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
@@ -46,7 +46,7 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 </url>
 
 <url>
-<loc>http://www.zhaoguangze.com/pages/2016/01/01/AboutMe.html</loc>
+<loc>http://www.zhaoguangze.com/pages/2016/01/01/BlogStart.html</loc>
 <lastmod>2016-01-01T15:19:00-00:00</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.7</priority>
@@ -54,35 +54,35 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>http://www.zhaoguangze.com/category/life.html</loc>
-<lastmod>2016-01-03T17:29:20-00:00</lastmod>
+<lastmod>2016-01-06T11:34:51-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
 
 <url>
-<loc>http://www.zhaoguangze.com/tag/invest.html</loc>
-<lastmod>2016-01-03T17:29:20-00:00</lastmod>
-<changefreq>daily</changefreq>
-<priority>0.5</priority>
-</url>
-
-<url>
-<loc>http://www.zhaoguangze.com/tag/aboutme.html</loc>
-<lastmod>2016-01-03T17:29:20-00:00</lastmod>
+<loc>http://www.zhaoguangze.com/tag/blogstart.html</loc>
+<lastmod>2016-01-06T11:34:51-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
 
 <url>
 <loc>http://www.zhaoguangze.com/tag/annual.html</loc>
-<lastmod>2016-01-03T17:29:20-00:00</lastmod>
+<lastmod>2016-01-06T11:34:51-00:00</lastmod>
+<changefreq>daily</changefreq>
+<priority>0.5</priority>
+</url>
+
+<url>
+<loc>http://www.zhaoguangze.com/tag/invest.html</loc>
+<lastmod>2016-01-06T11:34:51-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
 
 <url>
 <loc>http://www.zhaoguangze.com/author/guangze-zhao.html</loc>
-<lastmod>2016-01-03T17:29:20-00:00</lastmod>
+<lastmod>2016-01-06T11:34:51-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
