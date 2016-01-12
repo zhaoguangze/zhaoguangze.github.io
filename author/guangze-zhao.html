@@ -60,8 +60,8 @@
 
     <div class='article'>
         <div class="content-title">
-            <a href="../pages/2016/01/09/opendaylightkai-fa-1-chu-shi-odl.html"><h1>OpenDayLight开发(1)-初识ODL</h1></a>
-2016-01-09
+            <a href="../pages/2016/01/12/opendaylightkai-fa-2-cong-toasterli-zi-xue-xi-rpcnotificationdatastore.html"><h1>OpenDayLight开发(2)-从Toaster例子学习Rpc,Notification,DataStore</h1></a>
+2016-01-12
 
 by <a class="url fn" href="../author/guangze-zhao.html">Guangze Zhao</a>
  
@@ -70,7 +70,259 @@ by <a class="url fn" href="../author/guangze-zhao.html">Guangze Zhao</a>
  
         </div>
         
-        <div><h1>前言</h1>
+        <div><h2>概述</h2>
+<p>OpenDayLight的服务抽象层(SAL)早期的编程模型是API驱动(AD-SAL)，北向API一一对应南向协议，使得AD-SAL开发的北向应用程序只能依赖唯一的南向协议，不具备通用性。后来编程模型改为模型驱动，即MD-SAL,本人主要接触的也是MD-SAL，并没有基于AD-SAL做过开发。MD-SAL通过Yang Model定义模型，北向应用程序与模型交互，模型与网络交互。</p>
+<h2>关于MD-SAL</h2>
+<ul>
+<li>
+<p>MD-SAL模型驱动的服务抽象层，为Apps和Plugins开发提供同意支持</p>
+</li>
+<li>
+<p>提供Request Routing和用来实现抽象服务和相应API的基础框架</p>
+</li>
+<li>
+<p>抽象服务和API都由各个Plugin通过Yang Model定义</p>
+</li>
+<li>
+<p>Yang Tools Plugin根据Yang Model的定义自动生成API，生成相应Java代码</p>
+</li>
+<li>
+<p>开发者通过实现自动生成的Service Interface来实现具体的API功能和服务内容</p>
+</li>
+<li>
+<p>Plugin通过MD-SAL和生成的API(Rpc,Notification)，DataStore去利用其他Plugin的服务和数据</p>
+</li>
+<li>
+<p>所有功能模块的信息交互，数据存储调用都通过MD-SAL完成</p>
+</li>
+</ul>
+<h2>名词解释</h2>
+<ul>
+<li>Rpc:提供服务的远程调用接口</li>
+<li>Notification:提供通知，可以发出通知和接收通知。</li>
+<li>DataStore:提供数据存储，读取，Transaction等功能。</li>
+<li>Request Routing:提供请求路由功能，把外部请求传送到正确的Plugin和Node instance处理。</li>
+<li>Node instance:Yang结构树上的节点实例</li>
+<li>Restconf Subsystem:自动定义和创建Restconf API的Plugin</li>
+<li>Config subsystem:提供统一的配置文件管理功能的Plugin</li>
+</ul>
+<h2>MD-SAL Plugin</h2>
+<p>Plugin与MD-SAL的关联方式可分成两种:</p>
+<ol>
+<li>BA(Binding-Aware) 使用Yang Model定义模型，并自动生成的Java Bindings的Plugin</li>
+<li>BI(Binding-Independent) 与BA不同，不依赖于Java Bindings</li>
+</ol>
+<h2>Yang Model</h2>
+<p>Yang Model可以定义三种类型：Rpc，Notification，Data。</p>
+<p>Rpc可以理解北向调用模型的相关服务接口；</p>
+<p>Notification为通知，通常用于发送某种事件而广播通知，或订阅通知收到通知后的操作;</p>
+<p>Data为数据，Yang Model中可以定义数据类型并存储数据，data分两种：Config和Operational。Config为配置信息，北向应用向南向网络下发的配置数据信息，Operational为运行时信息，通常是ODL记录的南向的网络状态信息。</p>
+<p>Yang Model详细语法规则，参照https://tools.ietf.org/html/rfc6020</p>
+<h2>Rpc</h2>
+<h3>Rpc definitions in YANG</h3>
+<p>Toaster例子中，在toaster-api目录下的Yang文件中定义了三个rpc：make-toast, cancel-toast, restock-toaster。对应实现了三个功能：烤面包，取消烧烤，重新填装。烤面包操作需输入两个参数：熟的程度和面包类型。取消烧烤没有输入输出。重新填装需输入重新填装的数量。</p>
+<div class="highlight"><pre><span class="n">rpc</span> <span class="n">make</span><span class="o">-</span><span class="n">toast</span><span class="p">{</span>
+    <span class="n">input</span><span class="p">{</span>
+        <span class="n">leaf</span> <span class="n">toasterDoneness</span><span class="p">{</span>
+            <span class="n">type</span> <span class="n">uint32</span><span class="p">{</span>
+                <span class="n">range</span> <span class="s">&quot;1 .. 10&quot;</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="k">default</span> <span class="sc">&#39;5&#39;</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="n">leaf</span> <span class="n">toasterToastType</span><span class="p">{</span>
+            <span class="n">type</span> <span class="n">identityref</span><span class="p">{</span>
+                <span class="n">base</span> <span class="n">toast</span><span class="o">:</span><span class="n">toast</span><span class="o">-</span><span class="n">type</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="k">default</span> <span class="err">&#39;</span><span class="n">wheat</span><span class="o">-</span><span class="n">bread</span><span class="err">&#39;</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span> <span class="c1">// rpc make-toast</span>
+
+<span class="n">rpc</span> <span class="n">cancel</span><span class="o">-</span><span class="n">toast</span><span class="p">{</span>
+<span class="p">}</span> <span class="c1">// rpc cancel-toast</span>
+
+<span class="n">rpc</span> <span class="n">restock</span><span class="o">-</span><span class="n">toaster</span><span class="p">{</span>
+    <span class="n">input</span><span class="p">{</span>
+        <span class="n">leaf</span> <span class="n">amountOfBreadToStock</span><span class="p">{</span>
+            <span class="n">type</span> <span class="n">uint32</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span> <span class="c1">// rpc restock-toaster</span>
+</pre></div>
+
+
+<h3>Rpc registration</h3>
+<p>在api/目录下写完Yang Model后编译，自动生成Java Code, Rpc对应ToasterService</p>
+<p>在toaster-impl/中需实现ToasterService接口，</p>
+<div class="highlight"><pre><span class="n">public</span> <span class="n">class</span> <span class="n">ToasterImpl</span> <span class="n">implements</span> <span class="p">...,</span> <span class="n">ToasterService</span><span class="p">,</span> <span class="p">...{}</span>
+</pre></div>
+
+
+<p>然后在注册Rpc</p>
+<div class="highlight"><pre><span class="err">@</span><span class="n">Override</span>
+<span class="n">public</span> <span class="kt">void</span> <span class="n">onSessionInitiated</span><span class="p">(</span><span class="n">ProviderContext</span> <span class="n">session</span><span class="p">){</span>
+    <span class="c1">//Register the RPC Service</span>
+    <span class="n">rpcReg</span> <span class="o">=</span> <span class="n">session</span><span class="p">.</span><span class="n">addRpcImplementation</span><span class="p">(</span><span class="n">ToasterService</span><span class="p">.</span><span class="n">class</span><span class="p">,</span> <span class="n">this</span><span class="p">);</span>
+    <span class="p">...</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<h3>Rpc implementation</h3>
+<p>最后实现Rpc的功能,e.g. make-toast</p>
+<div class="highlight"><pre><span class="p">@</span><span class="nx">Override</span>
+<span class="k">public</span> <span class="nf">Future</span><span class="o">&lt;</span><span class="nx">RpcResult</span><span class="o">&lt;</span><span class="bp">Void</span><span class="o">&gt;&gt;</span> <span class="nx">makeToast</span><span class="p">(</span> <span class="nx">final</span> <span class="nx">MakeToastInput</span> <span class="nb">input</span><span class="p">){</span>
+    <span class="k">LOG</span><span class="bp">.</span><span class="nx">info</span><span class="p">(</span><span class="s2">&quot;makeToast: {}&quot;</span><span class="p">,</span> <span class="nb">input</span><span class="p">);</span>
+    <span class="k">return</span> <span class="nx">Futures.immediateFuture</span><span class="p">(</span> <span class="nx">RpcResultBuilder.</span><span class="o">&lt;</span><span class="bp">Void</span><span class="o">&gt;</span> <span class="nx">success</span><span class="p">()</span><span class="bp">.</span><span class="nx">build</span><span class="p">()</span> <span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<h2>Notification</h2>
+<p>在Yang Model中定义</p>
+<div class="highlight"><pre><span class="n">notification</span> <span class="n">toasterOutOfBread</span> <span class="p">{</span>
+    <span class="n">description</span>
+        <span class="s">&quot;Indicates that the toaster has run out of bread.&quot;</span><span class="p">;</span>
+<span class="p">}</span> <span class="c1">// notification toasterOutOfBread</span>
+</pre></div>
+
+
+<p>在SAL中注册</p>
+<div class="highlight"><pre><span class="n">private</span> <span class="n">NotificationsProviderService</span> <span class="n">notificationService</span><span class="p">;</span>
+<span class="n">public</span> <span class="kt">void</span> <span class="nf">onSessionInitiated</span><span class="p">(</span> <span class="n">ProviderContext</span> <span class="n">session</span><span class="p">)</span> <span class="p">{</span>
+    <span class="p">...</span>
+    <span class="n">this</span><span class="p">.</span><span class="n">notificationService</span> <span class="o">=</span> <span class="n">session</span><span class="p">.</span><span class="n">getSALService</span><span class="p">(</span><span class="n">NotificationProvierService</span><span class="p">.</span><span class="n">class</span><span class="p">);</span>
+    <span class="p">...</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<p>发送通知</p>
+<div class="highlight"><pre><span class="k">if</span><span class="p">(</span><span class="n">outOfBread</span><span class="p">())</span> <span class="p">{</span>
+    <span class="n">notificationService</span><span class="p">.</span><span class="n">publish</span><span class="p">(</span><span class="n">new</span> <span class="n">ToasterOutOfBreadBuilder</span><span class="p">().</span><span class="n">build</span><span class="p">());</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<p>编译api/,YangModel中定义的notification会自动生成Listener接口ToasterListener,订阅收到通知后的操作需实现该接口，如下是自动生成的ToasterListener代码。</p>
+<div class="highlight"><pre><span class="n">public</span> <span class="n">interface</span> <span class="n">ToasterListener</span> <span class="n">extends</span> <span class="n">NotificationListener</span> <span class="p">{</span>
+    <span class="c1">// Indicates that the toaster has run out of bread.</span>
+    <span class="kt">void</span> <span class="n">onToasterOutOfBread</span><span class="p">(</span><span class="n">ToasterOutOfBread</span> <span class="n">notification</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<h2>DataStore</h2>
+<h3>Yang Data Tree</h3>
+<p>MD-SAL中通过DataStore存储数据,与DataStore的交互通过DataBroker实现，DataStore中存储的数据发生变化会触发onDataChange()事件，在onDataChange()中响应DataStore的变化。数据在DataStore中以树形结构存储。
+Yang模型中有:container, list, leaf数据类型。那么树形结构可能如：</p>
+<div class="highlight"><pre><span class="n">Container</span><span class="o">:</span> <span class="n">parent</span> <span class="n">of</span> <span class="n">list</span>
+<span class="n">List</span><span class="o">:</span> <span class="n">child</span> <span class="n">of</span> <span class="n">container</span><span class="o">,</span> <span class="n">parent</span> <span class="n">of</span> <span class="n">leaf</span>
+<span class="n">Leaf</span><span class="o">:</span> <span class="n">child</span> <span class="n">of</span> <span class="n">List</span><span class="o">,</span> <span class="n">container</span>
+</pre></div>
+
+
+<h3>相关说明</h3>
+<p>使用DataBroker对DataStore进行数据读写，监听数据仓库变化事件。</p>
+<ul>
+<li>注册监听器dataBroker.registerDataChangeListener(LogicalDataStoreType, InstanceIdentifier, dataChangeListener, DataChangeScope)</li>
+<li>LogicalDataStoreType:Configuration or Operational即DataStore中存储的数据类型，是Configuration或者Operational</li>
+<li>DataChangeScope:BASE(change in node only), ONE(change in node or direct children), SUBTREE(change in node or direct children or nested children)监听变化范围，BASE只监听当前节点变化事件，ONE监听当前节点和其左右儿子节点变化事件，SUBTREE监听当前节点和左右子树的所有变化事件。</li>
+<li>InstanceIdentifier是监听节点的身份标识。</li>
+<li>Implement the onDataChange(final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject&gt; change)实现onDataChange函数。</li>
+<li>AsyncDataChangeEvent has 4 APIs: getCreatedData, getUpdatedData, getOriginalData, getRemovedPaths.其作用是getCreatedData获取第一次创建DataStore并存入的数据。getUpdatedData获得更新后的数据，getOriginalData获得更新前的数据，getRemovedPaths获取删除以后的数据仓库。</li>
+<li>事务有三种，读，写，读写：ReadTransaction/ReadWriteTransaction/WriteTransaction</li>
+</ul>
+<h3>监听DataStore变化</h3>
+<p>为监听节点，创建身份标识Instance Identifier:</p>
+<div class="highlight"><pre><span class="k">public</span> <span class="nf">static</span> <span class="nx">final</span> <span class="nx">InstanceIdentifier</span><span class="o">&lt;</span><span class="nx">Toaster</span><span class="o">&gt;</span> <span class="n">TOASTER_IID</span> <span class="o">=</span> <span class="nx">InstanceIdentifier.builder</span><span class="p">(</span><span class="nx">Toaster.class</span><span class="p">)</span><span class="bp">.</span><span class="nx">build</span><span class="p">();</span>
+</pre></div>
+
+
+<p>使用DataBroker注册监听器</p>
+<div class="highlight"><pre><span class="n">dcReg</span> <span class="o">=</span> <span class="n">dataService</span><span class="p">.</span><span class="n">registerDataChangeListener</span><span class="p">(</span> <span class="n">LogicalDatastoreType</span><span class="p">.</span><span class="n">CONFIGURATION</span><span class="p">,</span> <span class="n">TOASTER_IID</span><span class="p">,</span> <span class="n">this</span><span class="p">,</span> <span class="n">DataChangeScope</span><span class="p">.</span><span class="n">SUBTREE</span><span class="p">);</span>
+</pre></div>
+
+
+<p>监听数据变化</p>
+<div class="highlight"><pre><span class="k">@Override</span>
+<span class="nt">public</span> <span class="nt">void</span> <span class="nt">onDataChange</span><span class="o">(</span><span class="nt">final</span> <span class="nt">AsyncDataChangeEvent</span><span class="o">&lt;</span><span class="nt">InstanceIdentifier</span><span class="o">&lt;?&gt;,</span> <span class="nt">DataObject</span><span class="o">&gt;</span> <span class="nt">change</span><span class="o">)</span><span class="p">{</span>
+    <span class="nt">DataObject</span> <span class="nt">dataObject</span> <span class="o">=</span> <span class="nt">change</span><span class="nc">.getUpdatedSubtree</span><span class="o">();</span>
+
+    <span class="nt">if</span><span class="o">(</span> <span class="nt">dataObject</span> <span class="nt">instanceof</span> <span class="nt">Toaster</span><span class="o">)</span> <span class="p">{</span>
+        <span class="n">Toaster</span> <span class="n">toaster</span> <span class="o">=</span> <span class="p">(</span><span class="n">Toaster</span><span class="p">)</span> <span class="n">dataObject</span><span class="p">;</span>
+        <span class="n">LOG</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;onDataChanged - new Toaster config: {}&quot;</span><span class="o">,</span> <span class="n">toaster</span><span class="p">);</span>
+    <span class="p">}</span> <span class="nt">else</span> <span class="p">{</span>
+        <span class="n">LOG</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;onDataChange - not instance of Toaster {}&quot;</span><span class="o">,</span> <span class="n">dataObject</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<h3>从DataStore读取数据</h3>
+<div class="highlight"><pre><span class="nx">ReadTransaction</span> <span class="n">readTx</span> <span class="o">=</span> <span class="nx">dataBroker.newReadOnlyTransaction</span><span class="p">();</span>
+<span class="nx">Optional</span><span class="o">&lt;</span><span class="nx">DataToBeReadClass</span><span class="o">&gt;</span> <span class="kd">data</span> <span class="o">=</span> <span class="nx">readTx.read</span><span class="p">(</span><span class="nx">LogicalDataStoreType</span><span class="p">,</span> <span class="nx">Instanceidentifier</span><span class="p">);</span>
+<span class="k">if</span><span class="p">(</span><span class="kd">data</span><span class="bp">.</span><span class="nx">isPresent</span><span class="p">)</span> <span class="p">{</span> <span class="nx">DataToBeReadClass</span> <span class="n">obj</span> <span class="o">=</span> <span class="kd">data</span><span class="bp">.</span><span class="nb">get</span><span class="p">();</span> <span class="p">}</span>
+</pre></div>
+
+
+<h3>向DataStore写入数据</h3>
+<p>1.Data:使用Yang模型自动生成的builder和setter方法创建数据。</p>
+<p>2.Create:使用dataBroker创建writeTransaction</p>
+<p>3.Put:将数据写入Transaction</p>
+<p>4.Submit:提交Transaction</p>
+<p>下面是同步方式写入</p>
+<div class="highlight"><pre><span class="n">Toaster</span> <span class="n">toaster</span> <span class="o">=</span> <span class="n">new</span> <span class="n">ToasterBuilder</span><span class="p">().</span><span class="n">setToasterManufacturer</span><span class="p">(</span> <span class="n">TOASTER_MANUFACTURER</span> <span class="p">).</span><span class="n">setToasterModelNumber</span><span class="p">(</span><span class="n">TOASTER_MODEL_NUMBER</span><span class="p">).</span><span class="n">setToasterStatus</span><span class="p">(</span> <span class="n">ToasterStatus</span><span class="p">.</span><span class="n">Up</span><span class="p">).</span><span class="n">build</span><span class="p">();</span>
+
+<span class="n">WriteTransaction</span> <span class="n">tx</span> <span class="o">=</span> <span class="n">dataService</span><span class="p">.</span><span class="n">newWriteOnlyTransaction</span><span class="p">();</span>
+
+<span class="n">tx</span><span class="p">.</span><span class="n">put</span><span class="p">(</span><span class="n">LogicalDatastoreType</span><span class="p">.</span><span class="n">OPERATIONAL</span><span class="p">,</span> <span class="n">TOASTER_IID</span><span class="p">,</span> <span class="n">toaster</span><span class="p">);</span>
+
+<span class="n">tx</span><span class="p">.</span><span class="n">submit</span><span class="p">();</span>
+</pre></div>
+
+
+<p>下面是异步方式写入</p>
+<div class="highlight"><pre><span class="nx">Toaster</span> <span class="n">toaster</span> <span class="o">=</span> <span class="nb">new</span> <span class="nx">ToasterBuilder</span><span class="p">()</span><span class="nx">.</span> <span class="nx">...</span> <span class="bp">.</span><span class="nx">build</span><span class="p">();</span>
+
+<span class="nx">WriteTransaction</span> <span class="n">tx</span> <span class="o">=</span> <span class="nx">dataService.newWriteOnlyTransaction</span><span class="p">();</span>
+
+<span class="nx">tx.put</span><span class="p">(</span><span class="nx">LogicalDatastoreType.OPERATIONAL</span><span class="p">,</span> <span class="nx">TOASTER_IID</span><span class="p">,</span> <span class="nx">toaster</span><span class="p">);</span>
+
+<span class="nx">Futures.addCallback</span><span class="p">(</span><span class="nx">tx.submit</span><span class="p">(),</span> <span class="nb">new</span> <span class="nx">FutureCallback</span><span class="o">&lt;</span><span class="bp">Void</span><span class="o">&gt;</span><span class="p">()</span> <span class="p">{</span>
+    <span class="p">@</span><span class="nx">Override</span>
+    <span class="k">public</span> <span class="nf">void</span> <span class="nx">onSuccess</span><span class="p">(</span> <span class="nx">final</span> <span class="bp">Void</span> <span class="nb">result</span><span class="p">){</span>
+        <span class="k">LOG</span><span class="bp">.</span><span class="nx">info</span><span class="p">(</span><span class="s2">&quot;initToasterOperational: transaction succeeded&quot;</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="p">@</span><span class="nx">Override</span>
+    <span class="k">public</span> <span class="nf">void</span> <span class="nx">onFailure</span><span class="p">(</span><span class="nx">final</span> <span class="nx">Throwable</span> <span class="nb">t</span><span class="p">){</span>
+        <span class="k">LOG</span><span class="bp">.</span><span class="nb">error</span><span class="p">(</span><span class="s2">&quot;initToasterOperational: transaction failed&quot;</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">});</span>
+</pre></div>
+
+
+<h2>总结</h2>
+<p>ODL wiki中Toaster是很好的入门OpenDayLight Plugin开发的例子，实现一遍Toaster，对刚刚入门的ODL学习者理解ODL非常受益，以上是我学习Toaster的一些总结，希望能给读者带来帮助。</p></div>
+        <hr />
+    </div>
+		
+
+ 
+        
+
+ 
+
+    <div class='article'>
+        <a href="../pages/2016/01/09/opendaylightkai-fa-1-chu-shi-odl.html"><h2>OpenDayLight开发(1)-初识ODL</h2></a>
+        <div class= "well small"> 2016-01-09
+
+by <a class="url fn" href="../author/guangze-zhao.html">Guangze Zhao</a>
+ 
+
+
+ </div>
+        <div class="summary"><h1>前言</h1>
 <p>今年夏天，在思科实习了三个多月的时间，主要做的是SDN方向开源控制器OpenDayLight相关的开发工作，在此之前，我不知道什么是SDN，更没接触过ODL，甚至网络方面的基础都很薄弱，一切从零开始，现记录下我的学习历程。</p>
 <hr />
 <h1>初识OpenDayLight</h1>
@@ -78,95 +330,9 @@ by <a class="url fn" href="../author/guangze-zhao.html">Guangze Zhao</a>
 <p>什么是SDN？SDN，Software Define Network，即软件定义网络，简单理解，传统网络中每台交换机或路由器相互独立控制，每台设备都由控制层和数据层组成，控制层负责计算，数据层负责根据计算结果的数据转发，软件定义网络概念希望将所有设备的控制层集中起来，统一计算和调度，网络中的交换机或路由器只负责根据集中控制器计算的结果进行数据转发，从而实现网络设备的软件和硬件的剥离。这有些类似计算机中的操作系统，像windows,Linux系统可以装在很多硬件设备上，而不是操作系统和计算机硬件相绑定。</p>
 <h2>OpenDayLight</h2>
 <p>什么是OpenDayLight？OpenDayLight(ODL)是一个开源的集中控制器，其他控制器还有ONOS，Ryu等，通过ODL可以对网络进行集中计算和调度。OpenDayLight提供了一套框架，为网络设备提供南向协议，北向提供可供调用的API接口，ODL的目的是为了上层应用程序更好的控制底层网络环境。ODL开发的范围很大，可以基于ODL做北向应用程序的开发，可以开发南向协议，还可以开发从北向到南向的完整plugin。我做的大部分工作是plugin的开发。先来熟悉ODL中的几个概念。</p>
-<h3>Controller</h3>
-<p>Controller采用OSGI Framework，实现了模块化和可扩展性。
-SAL即服务抽象层，是Controller最核心模块
-Controller由Bundle实现，Bundle是OSGI中的基本组件，表现形式是Jar/Kar文件。
-Controller控制模块间数据交互，数据存取，API调用等。</p>
-<h3>Plugin</h3>
-<p>plugin是通过SAL实现的功能模块。
-运行在ODL OSGI Framework上，与ODL共享一个JVM</p>
-<h3>Karaf</h3>
-<p>OSGI是Java动态模块系统，提供了模块应用开发框架，Karaf基于OSGI的容器，把应用程序分成多个功能模块，通过依赖dependency进行管理，Karaf中引用了feature概念，feature是符合某个功能特征的bundle集的部署描述。</p>
-<p>常用Karaf命令</p>
-<div class="highlight"><pre><span class="n">Logging</span>
-    <span class="o">-</span><span class="n">log</span><span class="o">:</span><span class="n">display</span>      <span class="n">display</span> <span class="n">the</span> <span class="n">entire</span> <span class="n">log</span>
-    <span class="o">-</span><span class="n">log</span><span class="o">:</span><span class="n">tail</span>         <span class="n">Continuously</span> <span class="n">display</span> <span class="n">the</span> <span class="n">last</span> <span class="n">lines</span> <span class="n">of</span> <span class="n">the</span> <span class="n">log</span>
-<span class="n">Features</span>
-    <span class="o">-</span><span class="n">feature</span><span class="o">:</span><span class="n">list</span>     <span class="n">List</span> <span class="n">all</span> <span class="n">features</span> <span class="n">known</span> <span class="n">to</span> <span class="n">the</span> <span class="n">controller</span>
-    <span class="o">-</span><span class="n">feature</span><span class="o">:</span><span class="n">install</span>  <span class="n">install</span> <span class="n">a</span> <span class="n">feature</span>
-<span class="n">Repository</span>
-    <span class="o">-</span><span class="n">repo</span><span class="o">:</span><span class="n">mvn</span>         <span class="n">Specifies</span> <span class="n">a</span> <span class="n">repository</span> <span class="n">in</span> <span class="n">which</span> <span class="n">Karaf</span> <span class="n">will</span> <span class="n">look</span> <span class="k">for</span> <span class="n">features</span>
-</pre></div>
-
-
-<h3>Maven</h3>
-<p>官方解释Apache Maven is a software project management and comprehension tool，Maven一个软件工程管理工具，可以控制软件工程的生命周期。</p>
-<p>Maven工程的生命周期：
-Validate, Compile, Test, Package, Integration-test, Verify, Install, deploy</p>
-<p>常用Maven命令</p>
-<div class="highlight"><pre><span class="n">clean</span><span class="o">:</span> <span class="n">clean</span> <span class="n">up</span> <span class="n">working</span> <span class="n">directory</span> <span class="n">of</span> <span class="n">files</span> <span class="n">that</span> <span class="n">were</span> <span class="n">created</span> <span class="n">build</span> <span class="n">time</span>
-<span class="n">install</span><span class="o">:</span> <span class="n">install</span> <span class="n">the</span> <span class="n">built</span> <span class="n">artifact</span> <span class="k">as</span> <span class="n">directed</span>
-<span class="o">-</span><span class="n">DskipTests</span><span class="o">:</span> <span class="n">don</span><span class="err">&#39;</span><span class="n">t</span> <span class="n">run</span> <span class="n">the</span> <span class="n">tests</span> <span class="k">for</span> <span class="k">this</span> <span class="n">build</span>
-<span class="o">-</span><span class="n">Dcheckstyle</span><span class="o">.</span><span class="na">skip</span><span class="o">=</span><span class="kc">true</span><span class="o">:</span> <span class="n">ignore</span> <span class="n">the</span> <span class="n">code</span> <span class="n">style</span>
-</pre></div>
-
-
-<p>OpenDayLight可以理解成一个基于OSGI框架的Maven工程。</p>
-<h2>开发过程</h2>
-<p>Code：use Intellij or Eclipse to write application code, create model, check errors</p>
-<p>Build: use Maven to build and package application, pull code into repository</p>
-<p>Test: use Karaf to run ODL and test application</p>
-<p>开发ODL plugin的过程首先定义Yang模型, 然后编译模型，自动生成部分代码和Rest API，最后编码实现逻辑。</p>
-<h2>开发环境</h2>
-<div class="highlight"><pre><span class="n">JDK</span> <span class="mf">1.7</span><span class="o">+</span>
-    <span class="o">-</span><span class="n">Set</span> <span class="n">JAVA_HOME</span>
-<span class="n">Maven</span> <span class="mf">3.1</span><span class="o">+</span>
-    <span class="o">-</span><span class="n">Set</span> <span class="n">MAVEN_HOME</span>
-    <span class="o">-</span><span class="n">Repository</span><span class="o">:</span> <span class="n">where</span> <span class="n">dependencies</span> <span class="n">are</span> <span class="n">downloaded</span> <span class="n">and</span> <span class="n">placed</span>
-    <span class="o">-</span><span class="n">settings</span><span class="p">.</span><span class="n">xml</span><span class="o">:</span> <span class="n">Points</span> <span class="n">Maven</span> <span class="n">to</span> <span class="n">where</span> <span class="n">repositories</span> <span class="n">are</span> <span class="n">located</span>
-<span class="n">Git</span>
-    <span class="o">-</span><span class="n">Install</span> <span class="n">Git</span> <span class="n">client</span>
-<span class="n">IDE</span>
-    <span class="o">-</span><span class="n">Intellij</span> <span class="n">IDEA</span>
-    <span class="o">-</span><span class="n">Eclipse</span>
-</pre></div>
-
-
-<h2>构建plugin</h2>
-<p>创建新的plugin命令</p>
-<div class="highlight"><pre><span class="n">mvn</span> <span class="n">archetype</span><span class="o">:</span><span class="n">generate</span> 
-<span class="o">-</span><span class="n">DarchetypeGroupId</span><span class="o">=</span><span class="n">org</span><span class="p">.</span><span class="n">opendaylight</span><span class="p">.</span><span class="n">controller</span> 
-<span class="o">-</span><span class="n">DarchetypeArtifactId</span><span class="o">=</span><span class="n">opendaylight</span><span class="o">-</span><span class="n">startup</span><span class="o">-</span><span class="n">archetype</span>    <span class="o">-</span><span class="n">DarchetypeRepository</span><span class="o">=</span><span class="n">http</span><span class="o">:</span><span class="c1">//nexus.opendaylight.org/content/repositoryes/opendaylight.snapshot/ </span>
-<span class="o">-</span><span class="n">DarchetypeCatalog</span><span class="o">=</span><span class="n">http</span><span class="o">:</span><span class="c1">//nexus.opendaylight.org/content/repositories/opendaylight.snapshot/archetype-catalog.xml</span>
-</pre></div>
-
-
-<p>输入响应提示</p>
-<div class="highlight"><pre>Define value for property &#39;groupId&#39;: : com.company.project
-Define value for property &#39;artifactId&#39;: : project
-Define value for property &#39;version&#39;:  1.0-SNAPSHOT: : 1.0.0-SNAPSHOT
-Define value for property &#39;package&#39;:  com.company.project
-Define value for property &#39;classPrefix&#39;:  <span class="cp">${</span><span class="n">artifactId</span><span class="o">.</span><span class="n">substring</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">toUpperCase</span><span class="p">()</span><span class="cp">}${</span><span class="n">artifactId</span><span class="o">.</span><span class="n">substring</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="cp">}</span>
-Define value for property &#39;copyright&#39;: : Copyright (c) 2015 Company, Inc.
-</pre></div>
-
-
-<p>接着会在当前目录下生成工程的文件目录</p>
-<div class="highlight"><pre><span class="n">cd</span> <span class="n">project</span><span class="o">/</span>
-    <span class="n">artifacts</span><span class="o">/</span>   <span class="err">由</span><span class="n">pom</span><span class="err">文件定义工程信息</span><span class="n">GroupId</span><span class="err">，</span><span class="n">ArtifactId</span><span class="err">，</span><span class="n">version</span><span class="err">，</span><span class="n">dependency</span>
-    <span class="n">api</span><span class="o">/</span>   <span class="err">由</span><span class="n">Yang</span> <span class="n">Model</span><span class="err">定义的工程的</span><span class="n">REST</span> <span class="err">和</span> <span class="n">Java</span> <span class="n">API</span><span class="p">,</span> <span class="n">API</span><span class="err">定义程序的功能接口</span>
-    <span class="n">features</span><span class="o">/</span>  <span class="err">工程的</span><span class="n">Karaf</span> <span class="n">feature</span><span class="err">和彼此依赖关系</span>
-    <span class="n">impl</span><span class="o">/</span>      <span class="err">工程的主要业务逻辑代码</span>
-    <span class="n">karaf</span><span class="o">/</span>     <span class="err">工程的客户端发行版，可运行，或安装在其他发行版</span><span class="n">ODL</span><span class="err">中</span>
-    <span class="n">pom</span><span class="p">.</span><span class="n">xml</span> <span class="err">项目配置文件</span>
-</pre></div>
-
-
-<p>接下来就可以在api目录下写Yang Model，在impl/中写实现功能代码了。</p></div>
-        <hr />
-    </div>
-		
+<h3>Controller ...</h3> <a class="btn btn-info xsmall" href="../pages/2016/01/09/opendaylightkai-fa-1-chu-shi-odl.html">read more</a></div>
+    </div>	
+				
 
  
         
