@@ -5,35 +5,35 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>http://www.zhaoguangze.com/</loc>
-<lastmod>2016-01-15T17:52:26-00:00</lastmod>
+<lastmod>2016-01-15T17:56:56-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
 
 <url>
 <loc>http://www.zhaoguangze.com/archives.html</loc>
-<lastmod>2016-01-15T17:52:26-00:00</lastmod>
+<lastmod>2016-01-15T17:56:56-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
 
 <url>
 <loc>http://www.zhaoguangze.com/tags.html</loc>
-<lastmod>2016-01-15T17:52:26-00:00</lastmod>
+<lastmod>2016-01-15T17:56:56-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
 
 <url>
 <loc>http://www.zhaoguangze.com/categories.html</loc>
-<lastmod>2016-01-15T17:52:26-00:00</lastmod>
+<lastmod>2016-01-15T17:56:56-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
 
 <url>
 <loc>http://www.zhaoguangze.com/pages/about.html</loc>
-<lastmod>2016-01-15T17:52:26-00:00</lastmod>
+<lastmod>2016-01-15T17:56:56-00:00</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.3</priority>
 </url>
@@ -60,21 +60,21 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 </url>
 
 <url>
-<loc>http://www.zhaoguangze.com/pages/2016/01/03/Annual.html</loc>
+<loc>http://www.zhaoguangze.com/pages/2016/01/03/2015zong-jie-qiu-zhi.html</loc>
 <lastmod>2016-01-03T11:02:00-00:00</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.7</priority>
 </url>
 
 <url>
-<loc>http://www.zhaoguangze.com/pages/2016/01/02/Invest.html</loc>
+<loc>http://www.zhaoguangze.com/pages/2016/01/02/2015tou-zi-yuan-nian.html</loc>
 <lastmod>2016-01-02T10:27:00-00:00</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.7</priority>
 </url>
 
 <url>
-<loc>http://www.zhaoguangze.com/pages/2016/01/01/BlogStart.html</loc>
+<loc>http://www.zhaoguangze.com/pages/2016/01/01/zhong-yu-you-liao-zi-ji-de-bo-ke.html</loc>
 <lastmod>2016-01-01T15:19:00-00:00</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.7</priority>
@@ -82,63 +82,63 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>http://www.zhaoguangze.com/category/life.html</loc>
-<lastmod>2016-01-15T17:52:26-00:00</lastmod>
+<lastmod>2016-01-15T17:56:56-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
 
 <url>
 <loc>http://www.zhaoguangze.com/category/tech.html</loc>
-<lastmod>2016-01-15T17:52:26-00:00</lastmod>
+<lastmod>2016-01-15T17:56:56-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
 
 <url>
 <loc>http://www.zhaoguangze.com/tag/invest.html</loc>
-<lastmod>2016-01-15T17:52:26-00:00</lastmod>
+<lastmod>2016-01-15T17:56:56-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
 
 <url>
 <loc>http://www.zhaoguangze.com/tag/annual.html</loc>
-<lastmod>2016-01-15T17:52:26-00:00</lastmod>
+<lastmod>2016-01-15T17:56:56-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
 
 <url>
 <loc>http://www.zhaoguangze.com/tag/odl.html</loc>
-<lastmod>2016-01-15T17:52:26-00:00</lastmod>
+<lastmod>2016-01-15T17:56:56-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
 
 <url>
 <loc>http://www.zhaoguangze.com/tag/opendaylight.html</loc>
-<lastmod>2016-01-15T17:52:26-00:00</lastmod>
+<lastmod>2016-01-15T17:56:56-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
 
 <url>
 <loc>http://www.zhaoguangze.com/tag/blogstart.html</loc>
-<lastmod>2016-01-15T17:52:26-00:00</lastmod>
+<lastmod>2016-01-15T17:56:56-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
 
 <url>
 <loc>http://www.zhaoguangze.com/tag/md-sal.html</loc>
-<lastmod>2016-01-15T17:52:26-00:00</lastmod>
+<lastmod>2016-01-15T17:56:56-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
 
 <url>
 <loc>http://www.zhaoguangze.com/author/guangze-zhao.html</loc>
-<lastmod>2016-01-15T17:52:26-00:00</lastmod>
+<lastmod>2016-01-15T17:56:56-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>

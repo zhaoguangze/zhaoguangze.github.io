@@ -101,7 +101,6 @@
 &lt;li&gt;Restconf Subsystem:自动定义和创建Restconf API的Plugin&lt;/li&gt;
 &lt;li&gt;Config subsystem:提供统一的配置文件管理功能的Plugin&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img alt="调用关系" src="http://pan.baidu.com/s/1Kl8om" /&gt;&lt;/p&gt;
 &lt;h2&gt;MD-SAL Plugin&lt;/h2&gt;
 &lt;p&gt;Plugin与MD-SAL的关联方式可分成两种:&lt;/p&gt;
 &lt;ol&gt;

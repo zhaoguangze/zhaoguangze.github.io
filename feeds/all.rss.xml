@@ -101,7 +101,6 @@
 &lt;li&gt;Restconf Subsystem:自动定义和创建Restconf API的Plugin&lt;/li&gt;
 &lt;li&gt;Config subsystem:提供统一的配置文件管理功能的Plugin&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img alt="调用关系" src="http://pan.baidu.com/s/1Kl8om" /&gt;&lt;/p&gt;
 &lt;h2&gt;MD-SAL Plugin&lt;/h2&gt;
 &lt;p&gt;Plugin与MD-SAL的关联方式可分成两种:&lt;/p&gt;
 &lt;ol&gt;
@@ -392,7 +391,7 @@ Define value for property &amp;#39;copyright&amp;#39;: : Copyright (c) 2015 Comp
 &lt;/pre&gt;&lt;/div&gt;
 
 
-&lt;p&gt;接下来就可以在api目录下写Yang Model，在impl/中写实现功能代码了。&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Guangze Zhao</dc:creator><pubDate>Sat, 09 Jan 2016 13:23:00 +0800</pubDate><guid>tag:www.zhaoguangze.com,2016-01-09:pages/2016/01/09/opendaylightkai-fa-1-chu-shi-odl.html</guid><category>OpenDayLight</category><category>ODL</category><category>MD-SAL</category></item><item><title>2015总结-求职</title><link>http://www.zhaoguangze.com/pages/2016/01/03/Annual.html</link><description>&lt;p&gt;2015年匆匆忙忙就过去了，时间走的太快，来不及思考，来不及沉淀。之前一直没有写年终总结的习惯，但现在感觉很有必要，算是对过去一年的简单回顾和对新年的期待。&lt;/p&gt;
+&lt;p&gt;接下来就可以在api目录下写Yang Model，在impl/中写实现功能代码了。&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Guangze Zhao</dc:creator><pubDate>Sat, 09 Jan 2016 13:23:00 +0800</pubDate><guid>tag:www.zhaoguangze.com,2016-01-09:pages/2016/01/09/opendaylightkai-fa-1-chu-shi-odl.html</guid><category>OpenDayLight</category><category>ODL</category><category>MD-SAL</category></item><item><title>2015总结-求职</title><link>http://www.zhaoguangze.com/pages/2016/01/03/2015zong-jie-qiu-zhi.html</link><description>&lt;p&gt;2015年匆匆忙忙就过去了，时间走的太快，来不及思考，来不及沉淀。之前一直没有写年终总结的习惯，但现在感觉很有必要，算是对过去一年的简单回顾和对新年的期待。&lt;/p&gt;
 &lt;h1&gt;求职&lt;/h1&gt;
 &lt;p&gt;这一年的主旋律是求职，也是我们这届的求职年，上了这么多年学，总算要开始找工作进入职场了，我也加入了浩浩荡荡的求职大军。&lt;/p&gt;
 &lt;p&gt;今年上半年都在实验室度过，做实验室项目，写小论文。由于要开始找工作的原因，也可能是自己觉着项目太水，没有付出100％的认真，做项目的同时自己也在为找工作刷着题，看着书。这点在当时的我以为是自己的小聪明，现在想想是自己太过浮躁。以后要经常告诫自己：做一件事要么不做，要么就踏下心来做到最好，不能敷衍了事，这样才能学到更多，收获更多。小论文早早写完了，写小论文的过程中，发现自己真心做不了科研，完全理论的东西，一点现实意义没有，完成小论文以后就决定放弃科研的路子了。&lt;/p&gt;
@@ -420,11 +419,11 @@ Define value for property &amp;#39;copyright&amp;#39;: : Copyright (c) 2015 Comp
 &lt;li&gt;
 &lt;p&gt;和女朋友去趟台湾或出国旅行一次。&lt;/p&gt;
 &lt;/li&gt;
-&lt;/ol&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Guangze Zhao</dc:creator><pubDate>Sun, 03 Jan 2016 11:02:00 +0800</pubDate><guid>tag:www.zhaoguangze.com,2016-01-03:pages/2016/01/03/Annual.html</guid><category>Annual</category></item><item><title>2015投资元年</title><link>http://www.zhaoguangze.com/pages/2016/01/02/Invest.html</link><description>&lt;p&gt;不得不说，2015是我炒股元年。2014年下半年股市风生水起，抱着趁牛市赚点生活费，Get投资理财的技能为以后生活添一笔收入的心态，我也在14年底开了股票账户，抱着无知，好奇，兴奋的心情杀入股市。&lt;/p&gt;
+&lt;/ol&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Guangze Zhao</dc:creator><pubDate>Sun, 03 Jan 2016 11:02:00 +0800</pubDate><guid>tag:www.zhaoguangze.com,2016-01-03:pages/2016/01/03/2015zong-jie-qiu-zhi.html</guid><category>Annual</category></item><item><title>2015投资元年</title><link>http://www.zhaoguangze.com/pages/2016/01/02/2015tou-zi-yuan-nian.html</link><description>&lt;p&gt;不得不说，2015是我炒股元年。2014年下半年股市风生水起，抱着趁牛市赚点生活费，Get投资理财的技能为以后生活添一笔收入的心态，我也在14年底开了股票账户，抱着无知，好奇，兴奋的心情杀入股市。&lt;/p&gt;
 &lt;p&gt;最开始进入股市的散户总喜欢盯盘看盘，不知道仓位控制，止盈止损，不懂市场规律，最开始我喜欢买市盈率低的股票，原因很简单：低估值，因此买的都是银行股，可银行股由于14年下半年的带动牛市的一波大涨现在已开始进入调整阶段，于是我成了高位接盘的接盘侠，收益可想而知，之后银行不行又买证券，保险。我把金融股买了个遍，每天看着创业板新高，金三胖调整，我在15年的大年三十之前亏损达到最大，亏了25%左右，心里真是说不出的滋味，对金三胖彻底失去信心，发誓以后再不买金三胖。&lt;/p&gt;
 &lt;p&gt;年后自以为作为高智商人才，不甘亏损，更加专研股票，开始了漫漫回本到盈利的过程，什么板块轮动，28转换，炒高转送，炒次新股，炒题材，炒概念，买卖过的股票太多了，印象最深的是中国北车了，在南北车合并前入手，经历了连续一周每天涨停都疯狂，此时我的账户资产已经翻了一倍，无知的我当时并不知道止盈的重要性，疯狂过后便是毁灭，合并后的每天杀跌让我后悔莫及，最后以盈利50%多离场。&lt;/p&gt;
 &lt;p&gt;7，8月份由于要找工作的原因，没时间打理股票，我把钱从股市转入基金，不幸的是股灾来了，我也不能完全幸免，还好止损及时，刚买的基金赔了10%多就立刻赎回了。利润回撤非常严重，但后面还有更严重的。&lt;/p&gt;
 &lt;p&gt;之后辗转几次，感谢苏宁云商，让我在股灾期间还能赚钱，可后来又买错来股票，全部赔了进去，一个成熟的投资者是不应该让自己的利润回撤太大的。10月份大盘开始反弹，可是当时我太忙了，完全错过了这波反弹，全是泪。&lt;/p&gt;
 &lt;p&gt;作为一个新手，韭菜，股市小白，这大概就是我一年的炒股经历，写的比较粗糙，但心历路程非常艰辛，炒股炒的是心，是一个人的心态，是一个人的哲学，我深刻认识到这一点，以后务必培养，贯彻自己的套路和哲学，方能驰骋股市，穿越牛熊。&lt;/p&gt;
-&lt;p&gt;这一年，以总体盈利40%多收场，有些失望，主要原因是利润回撤太多，不成熟的体现，经历了这一年，真真切切的掌握了很多金融知识，懂了投资理财，心态得到很多历练，仍有很多需要学习的地方。在2016年，希望自己的投资套路成熟起来，培养自己的哲学和心态，成为一个成熟的投资者。&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Guangze Zhao</dc:creator><pubDate>Sat, 02 Jan 2016 10:27:00 +0800</pubDate><guid>tag:www.zhaoguangze.com,2016-01-02:pages/2016/01/02/Invest.html</guid><category>Invest</category></item><item><title>终于有了自己的博客</title><link>http://www.zhaoguangze.com/pages/2016/01/01/BlogStart.html</link><description>&lt;p&gt;一直想有个属于自己的博客，今天参照着前辈的教程，总算搭起来了，在godaddy购买了顶级域名www.zhaoguangze.com，博客初步有了样子，以后要好好打理，记录自己生活的点滴，和技术的成长历程。&lt;/p&gt;
-&lt;p&gt;欢迎大家访问http://www.zhaoguangze.com，进入我的世界。&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Guangze Zhao</dc:creator><pubDate>Fri, 01 Jan 2016 15:19:00 +0800</pubDate><guid>tag:www.zhaoguangze.com,2016-01-01:pages/2016/01/01/BlogStart.html</guid><category>BlogStart</category></item></channel></rss>
+&lt;p&gt;这一年，以总体盈利40%多收场，有些失望，主要原因是利润回撤太多，不成熟的体现，经历了这一年，真真切切的掌握了很多金融知识，懂了投资理财，心态得到很多历练，仍有很多需要学习的地方。在2016年，希望自己的投资套路成熟起来，培养自己的哲学和心态，成为一个成熟的投资者。&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Guangze Zhao</dc:creator><pubDate>Sat, 02 Jan 2016 10:27:00 +0800</pubDate><guid>tag:www.zhaoguangze.com,2016-01-02:pages/2016/01/02/2015tou-zi-yuan-nian.html</guid><category>Invest</category></item><item><title>终于有了自己的博客</title><link>http://www.zhaoguangze.com/pages/2016/01/01/zhong-yu-you-liao-zi-ji-de-bo-ke.html</link><description>&lt;p&gt;一直想有个属于自己的博客，今天参照着前辈的教程，总算搭起来了，在godaddy购买了顶级域名www.zhaoguangze.com，博客初步有了样子，以后要好好打理，记录自己生活的点滴，和技术的成长历程。&lt;/p&gt;
+&lt;p&gt;欢迎大家访问http://www.zhaoguangze.com，进入我的世界。&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Guangze Zhao</dc:creator><pubDate>Fri, 01 Jan 2016 15:19:00 +0800</pubDate><guid>tag:www.zhaoguangze.com,2016-01-01:pages/2016/01/01/zhong-yu-you-liao-zi-ji-de-bo-ke.html</guid><category>BlogStart</category></item></channel></rss>
