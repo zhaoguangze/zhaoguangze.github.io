@@ -1,5 +1,68 @@
 <?xml version="1.0" encoding="utf-8"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Guangze Zhao's Blog</title><link>http://www.zhaoguangze.com/</link><description></description><atom:link href="http://www.zhaoguangze.com/feeds/tech.rss.xml" rel="self"></atom:link><lastBuildDate>Tue, 12 Jan 2016 21:35:00 +0800</lastBuildDate><item><title>OpenDayLight开发(2)-从Toaster例子学习Rpc,Notification,DataStore</title><link>http://www.zhaoguangze.com/pages/2016/01/12/opendaylightkai-fa-2-cong-toasterli-zi-xue-xi-rpcnotificationdatastore.html</link><description>&lt;h2&gt;概述&lt;/h2&gt;
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Guangze Zhao's Blog</title><link>http://www.zhaoguangze.com/</link><description></description><atom:link href="http://www.zhaoguangze.com/feeds/tech.rss.xml" rel="self"></atom:link><lastBuildDate>Fri, 15 Jan 2016 00:00:00 +0800</lastBuildDate><item><title>OpenDayLight开发(3)-DataStoreChange监听器三种类型</title><link>http://www.zhaoguangze.com/pages/2016/01/15/opendaylightkai-fa-3-datastorechangejian-ting-qi-san-chong-lei-xing.html</link><description>&lt;p&gt;OpenDayLight中的所有数据都保存在DataStore中，并且数据以树形结构存储，可参考OpenDayLight开发(2)中的介绍。外界对DataStore的访问有BA和BI两种方式，这两种方式具有映射关系，BI像是BA的底层实现，通过QName实现对数据的索引，而BA更像是在BI上的封装，不能以BI的方式对数据进行准确的索引，但是提供了更方便的调用接口等。&lt;/p&gt;
+&lt;p&gt;&lt;img alt="映射关系" src="http://pan.baidu.com/s/1sk3ImtR" /&gt;&lt;/p&gt;
+&lt;p&gt;由于数据存储在DataStore中，因此ODL中对DataStore的访问非常重要。DataStore的变化会触发DataStoreChange事件的发生，设置监听器收到变化事件后触发任务是ODL的运行机制。最近研究了三种Listener类型: DataChangeListener, DataTreeChangeListener, DomDataTreeChangeListener.&lt;/p&gt;
+&lt;h2&gt;DataChangeListener&lt;/h2&gt;
+&lt;p&gt;DataChangeListener是最简单的使用方式。Toaster中用的就是这种Listener，使用Binding-aware方式访问DataStore，具体调用方式在ODL(2)中有了说明，这里不再重复。其中需注意的是数据通过IID(InstanceIdentifier)作为索引/标识。使用DataChangeListener往往需要对整颗树进行监听，树中任何一个叶子节点的变化都会触发DataChangeListener事件，效率非常低下。&lt;/p&gt;
+&lt;h2&gt;DataTreeChangeListener&lt;/h2&gt;
+&lt;p&gt;DataTreeChangeListener，数据的标识在IID的基础上，进一步精确，通过DataTreeIdentifier进行数据在树型结构中存储位置的定位。通过DataTreeIdentifier可以定位到树中的树干，可以进行更精确的变化位置的监听。使用方式：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="n"&gt;Implement&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; 
+    &lt;span class="kd"&gt;class&lt;/span&gt; &lt;span class="n"&gt;VlanProvider&lt;/span&gt; &lt;span class="kd"&gt;implements&lt;/span&gt; &lt;span class="n"&gt;DataTreeChangeListener&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="n"&gt;Vlan&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;
+
+&lt;span class="n"&gt;Identifier&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; 
+    &lt;span class="n"&gt;InstanceIdentifier&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="n"&gt;vlan&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;Vlan_IID&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;InstanceIdentifier&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;builder&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Device&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;config&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;class&lt;/span&gt;&lt;span class="o"&gt;).&lt;/span&gt;&lt;span class="n"&gt;child&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Switch&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;class&lt;/span&gt;&lt;span class="o"&gt;).&lt;/span&gt;&lt;span class="n"&gt;child&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;vlan&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;class&lt;/span&gt;&lt;span class="o"&gt;);&lt;/span&gt;
+
+    &lt;span class="n"&gt;DataTreeIdentifier&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="n"&gt;vlan&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;vlan_path&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="k"&gt;new&lt;/span&gt; &lt;span class="n"&gt;DataTreeIdentifier&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&amp;gt;(&lt;/span&gt;&lt;span class="n"&gt;LogicalDatastoreType&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;CONFIGURATION&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="n"&gt;Vlan_IID&lt;/span&gt;&lt;span class="o"&gt;);&lt;/span&gt;
+
+&lt;span class="n"&gt;Register&lt;/span&gt; &lt;span class="n"&gt;Listener&lt;/span&gt; &lt;span class="k"&gt;with&lt;/span&gt; &lt;span class="n"&gt;DataBroker&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
+    &lt;span class="k"&gt;this&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;VlanListener&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;dataBroker&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;registerDataTreeChangeListener&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;vlan_path&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="k"&gt;this&lt;/span&gt;&lt;span class="o"&gt;);&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;首先当前类实现DataTreeChangeListener接口，然后声明DataTreeIdentifier，最后注册监听器。监听函数代码如下：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="k"&gt;public&lt;/span&gt; &lt;span class="nf"&gt;void&lt;/span&gt; &lt;span class="nx"&gt;onDataTreeChanged&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;Collection&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nx"&gt;DataTreeModification&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nx"&gt;Vlan&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class="nx"&gt;changed&lt;/span&gt;&lt;span class="p"&gt;){&lt;/span&gt;
+
+    &lt;span class="nb"&gt;for&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;final&lt;/span&gt; &lt;span class="nx"&gt;DataTreeModification&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nx"&gt;Vlan&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt; &lt;span class="nx"&gt;change&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="nx"&gt;changed&lt;/span&gt;&lt;span class="p"&gt;){&lt;/span&gt;
+        &lt;span class="nx"&gt;final&lt;/span&gt; &lt;span class="nx"&gt;DataObjectModification&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nx"&gt;Vlan&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;rootChange&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;change.getRootNode&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+        &lt;span class="nx"&gt;switch&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;rootChange.getModificationType&lt;/span&gt;&lt;span class="p"&gt;()){&lt;/span&gt;
+            &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="nb"&gt;WRITE&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+                &lt;span class="k"&gt;LOG&lt;/span&gt;&lt;span class="bp"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;info&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Write - before : {} after : {}&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;rootChange.getDataBefore&lt;/span&gt;&lt;span class="p"&gt;(),&lt;/span&gt; &lt;span class="nx"&gt;rootChange.getDataAfter&lt;/span&gt;&lt;span class="p"&gt;());&lt;/span&gt;
+                &lt;span class="nx"&gt;break&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+            &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="nx"&gt;SUBTREE_MODIFIED&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+                &lt;span class="k"&gt;LOG&lt;/span&gt;&lt;span class="bp"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;info&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Write - before : {} after : {}&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;rootChange.getDataBefore&lt;/span&gt;&lt;span class="p"&gt;(),&lt;/span&gt; &lt;span class="nx"&gt;rootChange.getDataAfter&lt;/span&gt;&lt;span class="p"&gt;());&lt;/span&gt;
+                &lt;span class="nx"&gt;break&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+            &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="nb"&gt;DELETE&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+                &lt;span class="k"&gt;LOG&lt;/span&gt;&lt;span class="bp"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;info&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Write - before : {} after : {}&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;rootChange.getDataBefore&lt;/span&gt;&lt;span class="p"&gt;(),&lt;/span&gt; &lt;span class="nx"&gt;rootChange.getDataAfter&lt;/span&gt;&lt;span class="p"&gt;());&lt;/span&gt;
+                &lt;span class="nx"&gt;break&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;通过getRootNode()获取当前变化节点，getModificationType()获得数据树变化类型，分三种：WRITE, SUBTREE_MODIFIED, DELETE。写入，子树变化，或删除。getDataBefore()获得变化前的数据，getDataAfter()获得变化后的数据。&lt;/p&gt;
+&lt;h2&gt;DOMDataTreeChangeListener&lt;/h2&gt;
+&lt;p&gt;通过DOMDataBroker访问DataStore，使用Binding Independent类型，使用QName对数据树进行索引和数据的定位。相关名词：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;DOMDataBroker&lt;/li&gt;
+&lt;li&gt;DOMDataWriteTransaction&lt;/li&gt;
+&lt;li&gt;YangInstanceIdentifier&lt;/li&gt;
+&lt;li&gt;DataTreeChange(DOMDataTreeChange)&lt;/li&gt;
+&lt;li&gt;Transaction Chain&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;具体代码如：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="n"&gt;DOMDataWriteTransaction&lt;/span&gt; &lt;span class="n"&gt;tx&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;domDataBroker&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;newWriteOnlyTransaction&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+
+&lt;span class="n"&gt;YangInstanceIdentifier&lt;/span&gt; &lt;span class="n"&gt;yid&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;YangInstanceIdentifier&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;builder&lt;/span&gt;&lt;span class="p"&gt;().&lt;/span&gt;&lt;span class="n"&gt;node&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;TestExec&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;QNAME&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;&lt;span class="n"&gt;node&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;OuterList&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;QNAME&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;&lt;span class="n"&gt;nodeWithKey&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;OuterList&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;QNAME&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;element&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getId&lt;/span&gt;&lt;span class="p"&gt;()).&lt;/span&gt;&lt;span class="n"&gt;build&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+
+&lt;span class="n"&gt;tx&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;put&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;LogicalDatastoreType&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;CONFIGURATION&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;yid&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;element&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+&lt;span class="n"&gt;try&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;tx&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;submit&lt;/span&gt;&lt;span class="p"&gt;().&lt;/span&gt;&lt;span class="n"&gt;checkedGet&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="n"&gt;catch&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;TransactionCommitFailedException&lt;/span&gt; &lt;span class="n"&gt;e&lt;/span&gt;&lt;span class="p"&gt;){&lt;/span&gt;
+    &lt;span class="n"&gt;LOG&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;error&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;Transaction failed: {}&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;e&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;toString&lt;/span&gt;&lt;span class="p"&gt;());&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Guangze Zhao</dc:creator><pubDate>Fri, 15 Jan 2016 00:00:00 +0800</pubDate><guid>tag:www.zhaoguangze.com,2016-01-15:pages/2016/01/15/opendaylightkai-fa-3-datastorechangejian-ting-qi-san-chong-lei-xing.html</guid><category>OpenDayLight</category><category>MD-SAL</category><category>ODL</category></item><item><title>OpenDayLight开发(2)-从Toaster例子学习Rpc,Notification,DataStore</title><link>http://www.zhaoguangze.com/pages/2016/01/12/opendaylightkai-fa-2-cong-toasterli-zi-xue-xi-rpcnotificationdatastore.html</link><description>&lt;h2&gt;概述&lt;/h2&gt;
 &lt;p&gt;OpenDayLight的服务抽象层(SAL)早期的编程模型是API驱动(AD-SAL)，北向API一一对应南向协议，使得AD-SAL开发的北向应用程序只能依赖唯一的南向协议，不具备通用性。后来编程模型改为模型驱动，即MD-SAL,本人主要接触的也是MD-SAL，并没有基于AD-SAL做过开发。MD-SAL通过Yang Model定义模型，北向应用程序与模型交互，模型与网络交互。&lt;/p&gt;
 &lt;h2&gt;关于MD-SAL&lt;/h2&gt;
 &lt;ul&gt;
@@ -35,6 +98,7 @@
 &lt;li&gt;Restconf Subsystem:自动定义和创建Restconf API的Plugin&lt;/li&gt;
 &lt;li&gt;Config subsystem:提供统一的配置文件管理功能的Plugin&lt;/li&gt;
 &lt;/ul&gt;
+&lt;p&gt;&lt;img alt="调用关系" src="http://pan.baidu.com/s/1Kl8om" /&gt;&lt;/p&gt;
 &lt;h2&gt;MD-SAL Plugin&lt;/h2&gt;
 &lt;p&gt;Plugin与MD-SAL的关联方式可分成两种:&lt;/p&gt;
 &lt;ol&gt;

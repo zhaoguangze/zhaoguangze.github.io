@@ -60,8 +60,8 @@
 
     <div class='article'>
         <div class="content-title">
-            <a href="../pages/2016/01/12/opendaylightkai-fa-2-cong-toasterli-zi-xue-xi-rpcnotificationdatastore.html"><h1>OpenDayLight开发(2)-从Toaster例子学习Rpc,Notification,DataStore</h1></a>
-2016-01-12
+            <a href="../pages/2016/01/15/opendaylightkai-fa-3-datastorechangejian-ting-qi-san-chong-lei-xing.html"><h1>OpenDayLight开发(3)-DataStoreChange监听器三种类型</h1></a>
+2016-01-15
 
 by <a class="url fn" href="../author/guangze-zhao.html">Guangze Zhao</a>
  
@@ -70,7 +70,89 @@ by <a class="url fn" href="../author/guangze-zhao.html">Guangze Zhao</a>
  
         </div>
         
-        <div><h2>概述</h2>
+        <div><p>OpenDayLight中的所有数据都保存在DataStore中，并且数据以树形结构存储，可参考OpenDayLight开发(2)中的介绍。外界对DataStore的访问有BA和BI两种方式，这两种方式具有映射关系，BI像是BA的底层实现，通过QName实现对数据的索引，而BA更像是在BI上的封装，不能以BI的方式对数据进行准确的索引，但是提供了更方便的调用接口等。</p>
+<p><img alt="映射关系" src="http://pan.baidu.com/s/1sk3ImtR" /></p>
+<p>由于数据存储在DataStore中，因此ODL中对DataStore的访问非常重要。DataStore的变化会触发DataStoreChange事件的发生，设置监听器收到变化事件后触发任务是ODL的运行机制。最近研究了三种Listener类型: DataChangeListener, DataTreeChangeListener, DomDataTreeChangeListener.</p>
+<h2>DataChangeListener</h2>
+<p>DataChangeListener是最简单的使用方式。Toaster中用的就是这种Listener，使用Binding-aware方式访问DataStore，具体调用方式在ODL(2)中有了说明，这里不再重复。其中需注意的是数据通过IID(InstanceIdentifier)作为索引/标识。使用DataChangeListener往往需要对整颗树进行监听，树中任何一个叶子节点的变化都会触发DataChangeListener事件，效率非常低下。</p>
+<h2>DataTreeChangeListener</h2>
+<p>DataTreeChangeListener，数据的标识在IID的基础上，进一步精确，通过DataTreeIdentifier进行数据在树型结构中存储位置的定位。通过DataTreeIdentifier可以定位到树中的树干，可以进行更精确的变化位置的监听。使用方式：</p>
+<div class="highlight"><pre><span class="n">Implement</span><span class="o">:</span> 
+    <span class="kd">class</span> <span class="n">VlanProvider</span> <span class="kd">implements</span> <span class="n">DataTreeChangeListener</span><span class="o">&lt;</span><span class="n">Vlan</span><span class="o">&gt;</span>
+
+<span class="n">Identifier</span><span class="o">:</span> 
+    <span class="n">InstanceIdentifier</span><span class="o">&lt;</span><span class="n">vlan</span><span class="o">&gt;</span> <span class="n">Vlan_IID</span> <span class="o">=</span> <span class="n">InstanceIdentifier</span><span class="o">.</span><span class="na">builder</span><span class="o">(</span><span class="n">Device</span><span class="o">.</span><span class="na">config</span><span class="o">.</span><span class="na">class</span><span class="o">).</span><span class="n">child</span><span class="o">(</span><span class="n">Switch</span><span class="o">.</span><span class="na">class</span><span class="o">).</span><span class="n">child</span><span class="o">(</span><span class="n">vlan</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+
+    <span class="n">DataTreeIdentifier</span><span class="o">&lt;</span><span class="n">vlan</span><span class="o">&gt;</span> <span class="n">vlan_path</span> <span class="o">=</span> <span class="k">new</span> <span class="n">DataTreeIdentifier</span><span class="o">&lt;&gt;(</span><span class="n">LogicalDatastoreType</span><span class="o">.</span><span class="na">CONFIGURATION</span><span class="o">,</span> <span class="n">Vlan_IID</span><span class="o">);</span>
+
+<span class="n">Register</span> <span class="n">Listener</span> <span class="k">with</span> <span class="n">DataBroker</span><span class="o">:</span>
+    <span class="k">this</span><span class="o">.</span><span class="na">VlanListener</span> <span class="o">=</span> <span class="n">dataBroker</span><span class="o">.</span><span class="na">registerDataTreeChangeListener</span><span class="o">(</span><span class="n">vlan_path</span><span class="o">,</span> <span class="k">this</span><span class="o">);</span>
+</pre></div>
+
+
+<p>首先当前类实现DataTreeChangeListener接口，然后声明DataTreeIdentifier，最后注册监听器。监听函数代码如下：</p>
+<div class="highlight"><pre><span class="k">public</span> <span class="nf">void</span> <span class="nx">onDataTreeChanged</span><span class="p">(</span><span class="nx">Collection</span><span class="o">&lt;</span><span class="nx">DataTreeModification</span><span class="o">&lt;</span><span class="nx">Vlan</span><span class="o">&gt;&gt;</span> <span class="nx">changed</span><span class="p">){</span>
+
+    <span class="nb">for</span><span class="p">(</span><span class="nx">final</span> <span class="nx">DataTreeModification</span><span class="o">&lt;</span><span class="nx">Vlan</span><span class="o">&gt;</span> <span class="nx">change</span><span class="p">:</span> <span class="nx">changed</span><span class="p">){</span>
+        <span class="nx">final</span> <span class="nx">DataObjectModification</span><span class="o">&lt;</span><span class="nx">Vlan</span><span class="o">&gt;</span> <span class="n">rootChange</span> <span class="o">=</span> <span class="nx">change.getRootNode</span><span class="p">();</span>
+        <span class="nx">switch</span><span class="p">(</span><span class="nx">rootChange.getModificationType</span><span class="p">()){</span>
+            <span class="k">case</span> <span class="nb">WRITE</span><span class="p">:</span>
+                <span class="k">LOG</span><span class="bp">.</span><span class="nx">info</span><span class="p">(</span><span class="s2">&quot;Write - before : {} after : {}&quot;</span><span class="p">,</span> <span class="nx">rootChange.getDataBefore</span><span class="p">(),</span> <span class="nx">rootChange.getDataAfter</span><span class="p">());</span>
+                <span class="nx">break</span><span class="p">;</span>
+            <span class="k">case</span> <span class="nx">SUBTREE_MODIFIED</span><span class="p">:</span>
+                <span class="k">LOG</span><span class="bp">.</span><span class="nx">info</span><span class="p">(</span><span class="s2">&quot;Write - before : {} after : {}&quot;</span><span class="p">,</span> <span class="nx">rootChange.getDataBefore</span><span class="p">(),</span> <span class="nx">rootChange.getDataAfter</span><span class="p">());</span>
+                <span class="nx">break</span><span class="p">;</span>
+            <span class="k">case</span> <span class="nb">DELETE</span><span class="p">:</span>
+                <span class="k">LOG</span><span class="bp">.</span><span class="nx">info</span><span class="p">(</span><span class="s2">&quot;Write - before : {} after : {}&quot;</span><span class="p">,</span> <span class="nx">rootChange.getDataBefore</span><span class="p">(),</span> <span class="nx">rootChange.getDataAfter</span><span class="p">());</span>
+                <span class="nx">break</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<p>通过getRootNode()获取当前变化节点，getModificationType()获得数据树变化类型，分三种：WRITE, SUBTREE_MODIFIED, DELETE。写入，子树变化，或删除。getDataBefore()获得变化前的数据，getDataAfter()获得变化后的数据。</p>
+<h2>DOMDataTreeChangeListener</h2>
+<p>通过DOMDataBroker访问DataStore，使用Binding Independent类型，使用QName对数据树进行索引和数据的定位。相关名词：</p>
+<ul>
+<li>DOMDataBroker</li>
+<li>DOMDataWriteTransaction</li>
+<li>YangInstanceIdentifier</li>
+<li>DataTreeChange(DOMDataTreeChange)</li>
+<li>Transaction Chain</li>
+</ul>
+<p>具体代码如：</p>
+<div class="highlight"><pre><span class="n">DOMDataWriteTransaction</span> <span class="n">tx</span> <span class="o">=</span> <span class="n">domDataBroker</span><span class="p">.</span><span class="n">newWriteOnlyTransaction</span><span class="p">();</span>
+
+<span class="n">YangInstanceIdentifier</span> <span class="n">yid</span> <span class="o">=</span> <span class="n">YangInstanceIdentifier</span><span class="p">.</span><span class="n">builder</span><span class="p">().</span><span class="n">node</span><span class="p">(</span><span class="n">TestExec</span><span class="p">.</span><span class="n">QNAME</span><span class="p">).</span><span class="n">node</span><span class="p">(</span><span class="n">OuterList</span><span class="p">.</span><span class="n">QNAME</span><span class="p">).</span><span class="n">nodeWithKey</span><span class="p">(</span><span class="n">OuterList</span><span class="p">.</span><span class="n">QNAME</span><span class="p">,</span> <span class="n">element</span><span class="p">.</span><span class="n">getId</span><span class="p">()).</span><span class="n">build</span><span class="p">();</span>
+
+<span class="n">tx</span><span class="p">.</span><span class="n">put</span><span class="p">(</span><span class="n">LogicalDatastoreType</span><span class="p">.</span><span class="n">CONFIGURATION</span><span class="p">,</span> <span class="n">yid</span><span class="p">,</span> <span class="n">element</span><span class="p">);</span>
+
+<span class="n">try</span> <span class="p">{</span>
+    <span class="n">tx</span><span class="p">.</span><span class="n">submit</span><span class="p">().</span><span class="n">checkedGet</span><span class="p">();</span>
+<span class="p">}</span> <span class="n">catch</span><span class="p">(</span> <span class="n">TransactionCommitFailedException</span> <span class="n">e</span><span class="p">){</span>
+    <span class="n">LOG</span><span class="p">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;Transaction failed: {}&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">.</span><span class="n">toString</span><span class="p">());</span>
+<span class="p">}</span>
+</pre></div></div>
+        <hr />
+    </div>
+		
+
+ 
+        
+
+ 
+
+    <div class='article'>
+        <a href="../pages/2016/01/12/opendaylightkai-fa-2-cong-toasterli-zi-xue-xi-rpcnotificationdatastore.html"><h2>OpenDayLight开发(2)-从Toaster例子学习Rpc,Notification,DataStore</h2></a>
+        <div class= "well small"> 2016-01-12
+
+by <a class="url fn" href="../author/guangze-zhao.html">Guangze Zhao</a>
+ 
+
+
+ </div>
+        <div class="summary"><h2>概述</h2>
 <p>OpenDayLight的服务抽象层(SAL)早期的编程模型是API驱动(AD-SAL)，北向API一一对应南向协议，使得AD-SAL开发的北向应用程序只能依赖唯一的南向协议，不具备通用性。后来编程模型改为模型驱动，即MD-SAL,本人主要接触的也是MD-SAL，并没有基于AD-SAL做过开发。MD-SAL通过Yang Model定义模型，北向应用程序与模型交互，模型与网络交互。</p>
 <h2>关于MD-SAL</h2>
 <ul>
@@ -101,212 +183,9 @@ by <a class="url fn" href="../author/guangze-zhao.html">Guangze Zhao</a>
 <li>Rpc:提供服务的远程调用接口</li>
 <li>Notification:提供通知，可以发出通知和接收通知。</li>
 <li>DataStore:提供数据存储，读取，Transaction等功能。</li>
-<li>Request Routing:提供请求路由功能，把外部请求传送到正确的Plugin和Node instance处理。</li>
-<li>Node instance:Yang结构树上的节点实例</li>
-<li>Restconf Subsystem:自动定义和创建Restconf API的Plugin</li>
-<li>Config subsystem:提供统一的配置文件管理功能的Plugin</li>
-</ul>
-<h2>MD-SAL Plugin</h2>
-<p>Plugin与MD-SAL的关联方式可分成两种:</p>
-<ol>
-<li>BA(Binding-Aware) 使用Yang Model定义模型，并自动生成的Java Bindings的Plugin</li>
-<li>BI(Binding-Independent) 与BA不同，不依赖于Java Bindings</li>
-</ol>
-<h2>Yang Model</h2>
-<p>Yang Model可以定义三种类型：Rpc，Notification，Data。</p>
-<p>Rpc可以理解北向调用模型的相关服务接口；</p>
-<p>Notification为通知，通常用于发送某种事件而广播通知，或订阅通知收到通知后的操作;</p>
-<p>Data为数据，Yang Model中可以定义数据类型并存储数据，data分两种：Config和Operational。Config为配置信息，北向应用向南向网络下发的配置数据信息，Operational为运行时信息，通常是ODL记录的南向的网络状态信息。</p>
-<p>Yang Model详细语法规则，参照https://tools.ietf.org/html/rfc6020</p>
-<h2>Rpc</h2>
-<h3>Rpc definitions in YANG</h3>
-<p>Toaster例子中，在toaster-api目录下的Yang文件中定义了三个rpc：make-toast, cancel-toast, restock-toaster。对应实现了三个功能：烤面包，取消烧烤，重新填装。烤面包操作需输入两个参数：熟的程度和面包类型。取消烧烤没有输入输出。重新填装需输入重新填装的数量。</p>
-<div class="highlight"><pre><span class="n">rpc</span> <span class="n">make</span><span class="o">-</span><span class="n">toast</span><span class="p">{</span>
-    <span class="n">input</span><span class="p">{</span>
-        <span class="n">leaf</span> <span class="n">toasterDoneness</span><span class="p">{</span>
-            <span class="n">type</span> <span class="n">uint32</span><span class="p">{</span>
-                <span class="n">range</span> <span class="s">&quot;1 .. 10&quot;</span><span class="p">;</span>
-            <span class="p">}</span>
-            <span class="k">default</span> <span class="sc">&#39;5&#39;</span><span class="p">;</span>
-        <span class="p">}</span>
-        <span class="n">leaf</span> <span class="n">toasterToastType</span><span class="p">{</span>
-            <span class="n">type</span> <span class="n">identityref</span><span class="p">{</span>
-                <span class="n">base</span> <span class="n">toast</span><span class="o">:</span><span class="n">toast</span><span class="o">-</span><span class="n">type</span><span class="p">;</span>
-            <span class="p">}</span>
-            <span class="k">default</span> <span class="err">&#39;</span><span class="n">wheat</span><span class="o">-</span><span class="n">bread</span><span class="err">&#39;</span><span class="p">;</span>
-        <span class="p">}</span>
-    <span class="p">}</span>
-<span class="p">}</span> <span class="c1">// rpc make-toast</span>
-
-<span class="n">rpc</span> <span class="n">cancel</span><span class="o">-</span><span class="n">toast</span><span class="p">{</span>
-<span class="p">}</span> <span class="c1">// rpc cancel-toast</span>
-
-<span class="n">rpc</span> <span class="n">restock</span><span class="o">-</span><span class="n">toaster</span><span class="p">{</span>
-    <span class="n">input</span><span class="p">{</span>
-        <span class="n">leaf</span> <span class="n">amountOfBreadToStock</span><span class="p">{</span>
-            <span class="n">type</span> <span class="n">uint32</span><span class="p">;</span>
-        <span class="p">}</span>
-    <span class="p">}</span>
-<span class="p">}</span> <span class="c1">// rpc restock-toaster</span>
-</pre></div>
-
-
-<h3>Rpc registration</h3>
-<p>在api/目录下写完Yang Model后编译，自动生成Java Code, Rpc对应ToasterService</p>
-<p>在toaster-impl/中需实现ToasterService接口，</p>
-<div class="highlight"><pre><span class="n">public</span> <span class="n">class</span> <span class="n">ToasterImpl</span> <span class="n">implements</span> <span class="p">...,</span> <span class="n">ToasterService</span><span class="p">,</span> <span class="p">...{}</span>
-</pre></div>
-
-
-<p>然后在注册Rpc</p>
-<div class="highlight"><pre><span class="err">@</span><span class="n">Override</span>
-<span class="n">public</span> <span class="kt">void</span> <span class="n">onSessionInitiated</span><span class="p">(</span><span class="n">ProviderContext</span> <span class="n">session</span><span class="p">){</span>
-    <span class="c1">//Register the RPC Service</span>
-    <span class="n">rpcReg</span> <span class="o">=</span> <span class="n">session</span><span class="p">.</span><span class="n">addRpcImplementation</span><span class="p">(</span><span class="n">ToasterService</span><span class="p">.</span><span class="n">class</span><span class="p">,</span> <span class="n">this</span><span class="p">);</span>
-    <span class="p">...</span>
-<span class="p">}</span>
-</pre></div>
-
-
-<h3>Rpc implementation</h3>
-<p>最后实现Rpc的功能,e.g. make-toast</p>
-<div class="highlight"><pre><span class="p">@</span><span class="nx">Override</span>
-<span class="k">public</span> <span class="nf">Future</span><span class="o">&lt;</span><span class="nx">RpcResult</span><span class="o">&lt;</span><span class="bp">Void</span><span class="o">&gt;&gt;</span> <span class="nx">makeToast</span><span class="p">(</span> <span class="nx">final</span> <span class="nx">MakeToastInput</span> <span class="nb">input</span><span class="p">){</span>
-    <span class="k">LOG</span><span class="bp">.</span><span class="nx">info</span><span class="p">(</span><span class="s2">&quot;makeToast: {}&quot;</span><span class="p">,</span> <span class="nb">input</span><span class="p">);</span>
-    <span class="k">return</span> <span class="nx">Futures.immediateFuture</span><span class="p">(</span> <span class="nx">RpcResultBuilder.</span><span class="o">&lt;</span><span class="bp">Void</span><span class="o">&gt;</span> <span class="nx">success</span><span class="p">()</span><span class="bp">.</span><span class="nx">build</span><span class="p">()</span> <span class="p">);</span>
-<span class="p">}</span>
-</pre></div>
-
-
-<h2>Notification</h2>
-<p>在Yang Model中定义</p>
-<div class="highlight"><pre><span class="n">notification</span> <span class="n">toasterOutOfBread</span> <span class="p">{</span>
-    <span class="n">description</span>
-        <span class="s">&quot;Indicates that the toaster has run out of bread.&quot;</span><span class="p">;</span>
-<span class="p">}</span> <span class="c1">// notification toasterOutOfBread</span>
-</pre></div>
-
-
-<p>在SAL中注册</p>
-<div class="highlight"><pre><span class="n">private</span> <span class="n">NotificationsProviderService</span> <span class="n">notificationService</span><span class="p">;</span>
-<span class="n">public</span> <span class="kt">void</span> <span class="nf">onSessionInitiated</span><span class="p">(</span> <span class="n">ProviderContext</span> <span class="n">session</span><span class="p">)</span> <span class="p">{</span>
-    <span class="p">...</span>
-    <span class="n">this</span><span class="p">.</span><span class="n">notificationService</span> <span class="o">=</span> <span class="n">session</span><span class="p">.</span><span class="n">getSALService</span><span class="p">(</span><span class="n">NotificationProvierService</span><span class="p">.</span><span class="n">class</span><span class="p">);</span>
-    <span class="p">...</span>
-<span class="p">}</span>
-</pre></div>
-
-
-<p>发送通知</p>
-<div class="highlight"><pre><span class="k">if</span><span class="p">(</span><span class="n">outOfBread</span><span class="p">())</span> <span class="p">{</span>
-    <span class="n">notificationService</span><span class="p">.</span><span class="n">publish</span><span class="p">(</span><span class="n">new</span> <span class="n">ToasterOutOfBreadBuilder</span><span class="p">().</span><span class="n">build</span><span class="p">());</span>
-<span class="p">}</span>
-</pre></div>
-
-
-<p>编译api/,YangModel中定义的notification会自动生成Listener接口ToasterListener,订阅收到通知后的操作需实现该接口，如下是自动生成的ToasterListener代码。</p>
-<div class="highlight"><pre><span class="n">public</span> <span class="n">interface</span> <span class="n">ToasterListener</span> <span class="n">extends</span> <span class="n">NotificationListener</span> <span class="p">{</span>
-    <span class="c1">// Indicates that the toaster has run out of bread.</span>
-    <span class="kt">void</span> <span class="n">onToasterOutOfBread</span><span class="p">(</span><span class="n">ToasterOutOfBread</span> <span class="n">notification</span><span class="p">);</span>
-<span class="p">}</span>
-</pre></div>
-
-
-<h2>DataStore</h2>
-<h3>Yang Data Tree</h3>
-<p>MD-SAL中通过DataStore存储数据,与DataStore的交互通过DataBroker实现，DataStore中存储的数据发生变化会触发onDataChange()事件，在onDataChange()中响应DataStore的变化。数据在DataStore中以树形结构存储。
-Yang模型中有:container, list, leaf数据类型。那么树形结构可能如：</p>
-<div class="highlight"><pre><span class="n">Container</span><span class="o">:</span> <span class="n">parent</span> <span class="n">of</span> <span class="n">list</span>
-<span class="n">List</span><span class="o">:</span> <span class="n">child</span> <span class="n">of</span> <span class="n">container</span><span class="o">,</span> <span class="n">parent</span> <span class="n">of</span> <span class="n">leaf</span>
-<span class="n">Leaf</span><span class="o">:</span> <span class="n">child</span> <span class="n">of</span> <span class="n">List</span><span class="o">,</span> <span class="n">container</span>
-</pre></div>
-
-
-<h3>相关说明</h3>
-<p>使用DataBroker对DataStore进行数据读写，监听数据仓库变化事件。</p>
-<ul>
-<li>注册监听器dataBroker.registerDataChangeListener(LogicalDataStoreType, InstanceIdentifier, dataChangeListener, DataChangeScope)</li>
-<li>LogicalDataStoreType:Configuration or Operational即DataStore中存储的数据类型，是Configuration或者Operational</li>
-<li>DataChangeScope:BASE(change in node only), ONE(change in node or direct children), SUBTREE(change in node or direct children or nested children)监听变化范围，BASE只监听当前节点变化事件，ONE监听当前节点和其左右儿子节点变化事件，SUBTREE监听当前节点和左右子树的所有变化事件。</li>
-<li>InstanceIdentifier是监听节点的身份标识。</li>
-<li>Implement the onDataChange(final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject&gt; change)实现onDataChange函数。</li>
-<li>AsyncDataChangeEvent has 4 APIs: getCreatedData, getUpdatedData, getOriginalData, getRemovedPaths.其作用是getCreatedData获取第一次创建DataStore并存入的数据。getUpdatedData获得更新后的数据，getOriginalData获得更新前的数据，getRemovedPaths获取删除以后的数据仓库。</li>
-<li>事务有三种，读，写，读写：ReadTransaction/ReadWriteTransaction/WriteTransaction</li>
-</ul>
-<h3>监听DataStore变化</h3>
-<p>为监听节点，创建身份标识Instance Identifier:</p>
-<div class="highlight"><pre><span class="k">public</span> <span class="nf">static</span> <span class="nx">final</span> <span class="nx">InstanceIdentifier</span><span class="o">&lt;</span><span class="nx">Toaster</span><span class="o">&gt;</span> <span class="n">TOASTER_IID</span> <span class="o">=</span> <span class="nx">InstanceIdentifier.builder</span><span class="p">(</span><span class="nx">Toaster.class</span><span class="p">)</span><span class="bp">.</span><span class="nx">build</span><span class="p">();</span>
-</pre></div>
-
-
-<p>使用DataBroker注册监听器</p>
-<div class="highlight"><pre><span class="n">dcReg</span> <span class="o">=</span> <span class="n">dataService</span><span class="p">.</span><span class="n">registerDataChangeListener</span><span class="p">(</span> <span class="n">LogicalDatastoreType</span><span class="p">.</span><span class="n">CONFIGURATION</span><span class="p">,</span> <span class="n">TOASTER_IID</span><span class="p">,</span> <span class="n">this</span><span class="p">,</span> <span class="n">DataChangeScope</span><span class="p">.</span><span class="n">SUBTREE</span><span class="p">);</span>
-</pre></div>
-
-
-<p>监听数据变化</p>
-<div class="highlight"><pre><span class="k">@Override</span>
-<span class="nt">public</span> <span class="nt">void</span> <span class="nt">onDataChange</span><span class="o">(</span><span class="nt">final</span> <span class="nt">AsyncDataChangeEvent</span><span class="o">&lt;</span><span class="nt">InstanceIdentifier</span><span class="o">&lt;?&gt;,</span> <span class="nt">DataObject</span><span class="o">&gt;</span> <span class="nt">change</span><span class="o">)</span><span class="p">{</span>
-    <span class="nt">DataObject</span> <span class="nt">dataObject</span> <span class="o">=</span> <span class="nt">change</span><span class="nc">.getUpdatedSubtree</span><span class="o">();</span>
-
-    <span class="nt">if</span><span class="o">(</span> <span class="nt">dataObject</span> <span class="nt">instanceof</span> <span class="nt">Toaster</span><span class="o">)</span> <span class="p">{</span>
-        <span class="n">Toaster</span> <span class="n">toaster</span> <span class="o">=</span> <span class="p">(</span><span class="n">Toaster</span><span class="p">)</span> <span class="n">dataObject</span><span class="p">;</span>
-        <span class="n">LOG</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;onDataChanged - new Toaster config: {}&quot;</span><span class="o">,</span> <span class="n">toaster</span><span class="p">);</span>
-    <span class="p">}</span> <span class="nt">else</span> <span class="p">{</span>
-        <span class="n">LOG</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;onDataChange - not instance of Toaster {}&quot;</span><span class="o">,</span> <span class="n">dataObject</span><span class="p">);</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</pre></div>
-
-
-<h3>从DataStore读取数据</h3>
-<div class="highlight"><pre><span class="nx">ReadTransaction</span> <span class="n">readTx</span> <span class="o">=</span> <span class="nx">dataBroker.newReadOnlyTransaction</span><span class="p">();</span>
-<span class="nx">Optional</span><span class="o">&lt;</span><span class="nx">DataToBeReadClass</span><span class="o">&gt;</span> <span class="kd">data</span> <span class="o">=</span> <span class="nx">readTx.read</span><span class="p">(</span><span class="nx">LogicalDataStoreType</span><span class="p">,</span> <span class="nx">Instanceidentifier</span><span class="p">);</span>
-<span class="k">if</span><span class="p">(</span><span class="kd">data</span><span class="bp">.</span><span class="nx">isPresent</span><span class="p">)</span> <span class="p">{</span> <span class="nx">DataToBeReadClass</span> <span class="n">obj</span> <span class="o">=</span> <span class="kd">data</span><span class="bp">.</span><span class="nb">get</span><span class="p">();</span> <span class="p">}</span>
-</pre></div>
-
-
-<h3>向DataStore写入数据</h3>
-<p>1.Data:使用Yang模型自动生成的builder和setter方法创建数据。</p>
-<p>2.Create:使用dataBroker创建writeTransaction</p>
-<p>3.Put:将数据写入Transaction</p>
-<p>4.Submit:提交Transaction</p>
-<p>下面是同步方式写入</p>
-<div class="highlight"><pre><span class="n">Toaster</span> <span class="n">toaster</span> <span class="o">=</span> <span class="n">new</span> <span class="n">ToasterBuilder</span><span class="p">().</span><span class="n">setToasterManufacturer</span><span class="p">(</span> <span class="n">TOASTER_MANUFACTURER</span> <span class="p">).</span><span class="n">setToasterModelNumber</span><span class="p">(</span><span class="n">TOASTER_MODEL_NUMBER</span><span class="p">).</span><span class="n">setToasterStatus</span><span class="p">(</span> <span class="n">ToasterStatus</span><span class="p">.</span><span class="n">Up</span><span class="p">).</span><span class="n">build</span><span class="p">();</span>
-
-<span class="n">WriteTransaction</span> <span class="n">tx</span> <span class="o">=</span> <span class="n">dataService</span><span class="p">.</span><span class="n">newWriteOnlyTransaction</span><span class="p">();</span>
-
-<span class="n">tx</span><span class="p">.</span><span class="n">put</span><span class="p">(</span><span class="n">LogicalDatastoreType</span><span class="p">.</span><span class="n">OPERATIONAL</span><span class="p">,</span> <span class="n">TOASTER_IID</span><span class="p">,</span> <span class="n">toaster</span><span class="p">);</span>
-
-<span class="n">tx</span><span class="p">.</span><span class="n">submit</span><span class="p">();</span>
-</pre></div>
-
-
-<p>下面是异步方式写入</p>
-<div class="highlight"><pre><span class="nx">Toaster</span> <span class="n">toaster</span> <span class="o">=</span> <span class="nb">new</span> <span class="nx">ToasterBuilder</span><span class="p">()</span><span class="nx">.</span> <span class="nx">...</span> <span class="bp">.</span><span class="nx">build</span><span class="p">();</span>
-
-<span class="nx">WriteTransaction</span> <span class="n">tx</span> <span class="o">=</span> <span class="nx">dataService.newWriteOnlyTransaction</span><span class="p">();</span>
-
-<span class="nx">tx.put</span><span class="p">(</span><span class="nx">LogicalDatastoreType.OPERATIONAL</span><span class="p">,</span> <span class="nx">TOASTER_IID</span><span class="p">,</span> <span class="nx">toaster</span><span class="p">);</span>
-
-<span class="nx">Futures.addCallback</span><span class="p">(</span><span class="nx">tx.submit</span><span class="p">(),</span> <span class="nb">new</span> <span class="nx">FutureCallback</span><span class="o">&lt;</span><span class="bp">Void</span><span class="o">&gt;</span><span class="p">()</span> <span class="p">{</span>
-    <span class="p">@</span><span class="nx">Override</span>
-    <span class="k">public</span> <span class="nf">void</span> <span class="nx">onSuccess</span><span class="p">(</span> <span class="nx">final</span> <span class="bp">Void</span> <span class="nb">result</span><span class="p">){</span>
-        <span class="k">LOG</span><span class="bp">.</span><span class="nx">info</span><span class="p">(</span><span class="s2">&quot;initToasterOperational: transaction succeeded&quot;</span><span class="p">);</span>
-    <span class="p">}</span>
-    <span class="p">@</span><span class="nx">Override</span>
-    <span class="k">public</span> <span class="nf">void</span> <span class="nx">onFailure</span><span class="p">(</span><span class="nx">final</span> <span class="nx">Throwable</span> <span class="nb">t</span><span class="p">){</span>
-        <span class="k">LOG</span><span class="bp">.</span><span class="nb">error</span><span class="p">(</span><span class="s2">&quot;initToasterOperational: transaction failed&quot;</span><span class="p">);</span>
-    <span class="p">}</span>
-<span class="p">});</span>
-</pre></div>
-
-
-<h2>总结</h2>
-<p>ODL wiki中Toaster是很好的入门OpenDayLight Plugin开发的例子，实现一遍Toaster，对刚刚入门的ODL学习者理解ODL非常受益，以上是我学习Toaster的一些总结，希望能给读者带来帮助。</p></div>
-        <hr />
-    </div>
-		
+<li>Request Routing:提供请求路由功能，把外部请求传送到正确的Plugin和Node ...</li></ul> <a class="btn btn-info xsmall" href="../pages/2016/01/12/opendaylightkai-fa-2-cong-toasterli-zi-xue-xi-rpcnotificationdatastore.html">read more</a></div>
+    </div>	
+				
 
  
         
@@ -369,31 +248,14 @@ by <a class="url fn" href="../author/guangze-zhao.html">Guangze Zhao</a>
         <div class="summary"><p>2015炒股第一年</p> <a class="btn btn-info xsmall" href="../pages/2016/01/02/Invest.html">read more</a></div>
     </div>	
 				
-
- 
-        
-
- 
-
-    <div class='article'>
-        <a href="../pages/2016/01/01/BlogStart.html"><h2>终于有了自己的博客</h2></a>
-        <div class= "well small"> 2016-01-01
-
-by <a class="url fn" href="../author/guangze-zhao.html">Guangze Zhao</a>
- 
-
-
- </div>
-        <div class="summary"><p>一直想有个属于自己的博客</p> <a class="btn btn-info xsmall" href="../pages/2016/01/01/BlogStart.html">read more</a></div>
-    </div>	
-				
 <div class="pagination">
 <ul>
     <li class="prev disabled"><a href="#">&larr; Previous</a></li>
 
     <li class="active"><a href="../author/guangze-zhao.html">1</a></li>
+    <li class=""><a href="../author/guangze-zhao2.html">2</a></li>
 
-    <li class="next disabled"><a href="#">&rarr; Next</a></li>
+    <li class="next"><a href="../author/guangze-zhao2.html">Next &rarr;</a></li>
 
 </ul>
 </div>
