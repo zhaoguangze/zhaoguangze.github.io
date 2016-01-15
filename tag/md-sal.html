@@ -71,10 +71,10 @@ by <a class="url fn" href="../author/guangze-zhao.html">Guangze Zhao</a>
         </div>
         
         <div><p>OpenDayLight中的所有数据都保存在DataStore中，并且数据以树形结构存储，可参考OpenDayLight开发(2)中的介绍。外界对DataStore的访问有BA和BI两种方式，这两种方式具有映射关系，BI像是BA的底层实现，通过QName实现对数据的索引，而BA更像是在BI上的封装，不能以BI的方式对数据进行准确的索引，但是提供了更方便的调用接口等。</p>
-<p><img alt="映射关系" src="http://pan.baidu.com/s/1sk3ImtR" /></p>
+<p><img alt="映射关系" src="https://wiki.opendaylight.org/images/6/64/Arch-Fig4.jpg" /></p>
 <p>由于数据存储在DataStore中，因此ODL中对DataStore的访问非常重要。DataStore的变化会触发DataStoreChange事件的发生，设置监听器收到变化事件后触发任务是ODL的运行机制。最近研究了三种Listener类型: DataChangeListener, DataTreeChangeListener, DomDataTreeChangeListener.</p>
 <h2>DataChangeListener</h2>
-<p>DataChangeListener是最简单的使用方式。Toaster中用的就是这种Listener，使用Binding-aware方式访问DataStore，具体调用方式在ODL(2)中有了说明，这里不再重复。其中需注意的是数据通过IID(InstanceIdentifier)作为索引/标识。使用DataChangeListener往往需要对整颗树进行监听，树中任何一个叶子节点的变化都会触发DataChangeListener事件，效率非常低下。</p>
+<p>DataChangeListener是最简单的使用方式。Toaster中用的就是这种Listener，使用Binding-aware方式访问DataStore，具体调用方式在ODL(2)中有了说明，这里不再重复。其中需注意的是数据通过IID(InstanceIdentifier)作为索引/标识。使用DataChangeListener往往需要对整颗树进行监听，树中任何一个叶子节点的变化都会触发DataChangeListener事件。</p>
 <h2>DataTreeChangeListener</h2>
 <p>DataTreeChangeListener，数据的标识在IID的基础上，进一步精确，通过DataTreeIdentifier进行数据在树型结构中存储位置的定位。通过DataTreeIdentifier可以定位到树中的树干，可以进行更精确的变化位置的监听。使用方式：</p>
 <div class="highlight"><pre><span class="n">Implement</span><span class="o">:</span> 
@@ -133,7 +133,10 @@ by <a class="url fn" href="../author/guangze-zhao.html">Guangze Zhao</a>
 <span class="p">}</span> <span class="n">catch</span><span class="p">(</span> <span class="n">TransactionCommitFailedException</span> <span class="n">e</span><span class="p">){</span>
     <span class="n">LOG</span><span class="p">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;Transaction failed: {}&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">.</span><span class="n">toString</span><span class="p">());</span>
 <span class="p">}</span>
-</pre></div></div>
+</pre></div>
+
+
+<p>使用BI方式，通过QNAME进行索引，可对数据树中的任何位置进行精确的定位，直接获取QNAME对应位置的变化事件。</p></div>
         <hr />
     </div>
 		
