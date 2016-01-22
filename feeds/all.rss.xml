@@ -1,5 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Guangze Zhao's Blog</title><link>http://www.zhaoguangze.com/</link><description></description><atom:link href="http://www.zhaoguangze.com/feeds/all.rss.xml" rel="self"></atom:link><lastBuildDate>Fri, 15 Jan 2016 00:00:00 +0800</lastBuildDate><item><title>OpenDayLight开发(3)-DataStoreChange监听器三种类型</title><link>http://www.zhaoguangze.com/pages/2016/01/15/opendaylightkai-fa-3-datastorechangejian-ting-qi-san-chong-lei-xing.html</link><description>&lt;p&gt;OpenDayLight中的所有数据都保存在DataStore中，并且数据以树形结构存储，可参考OpenDayLight开发(2)中的介绍。外界对DataStore的访问有BA和BI两种方式，这两种方式具有映射关系，BI像是BA的底层实现，通过QName实现对数据的索引，而BA更像是在BI上的封装，不能以BI的方式对数据进行准确的索引，但是提供了更方便的调用接口等。&lt;/p&gt;
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Guangze Zhao's Blog</title><link>http://www.zhaoguangze.com/</link><description></description><atom:link href="http://www.zhaoguangze.com/feeds/all.rss.xml" rel="self"></atom:link><lastBuildDate>Thu, 21 Jan 2016 00:00:00 +0800</lastBuildDate><item><title>回家</title><link>http://www.zhaoguangze.com/pages/2016/01/21/hui-jia.html</link><description>&lt;h2&gt;前言&lt;/h2&gt;
+&lt;p&gt;又一年寒假回家，应该是最后一个假期了，买了北京回沈阳的学生票，想着最后享受一次学生待遇，早上花40大洋打车到火车站，然后惊然发现，没带学生证，无法取票，我面对两个选择：多停留一天，或买晚1小时的站票回家。纠结一番后，买了站票，又买个小马扎，就上车了，于是又一次便踏上了回家的列车。&lt;/p&gt;
+&lt;p&gt;出门这么多年，也算是身经百战了，怎么会犯如此低级错误呢，可能正因为太过自信而疏忽了一些东西。现在想想，距2009年夏天第一次离家，已经过去了六年半，2009年6月我高中毕业，2016年1月我即将研究生毕业。&lt;/p&gt;
+&lt;h2&gt;归途列车&lt;/h2&gt;
+&lt;p&gt;2009年底第一次寒假回家买的硬座，从西安到沈阳，那时还没有提速，大约30小时。第一次坐这么长时间硬座，挺难受的一晚上没睡着，就是坐着。30小时坐下来真的感觉很虚，对身体也是很大的摧残，但是有过这样一次经历，30小时硬座对我来说也没什么了。&lt;/p&gt;
+&lt;p&gt;2010年暑假，和老乡组团回家，还是30小时硬座，凌晨2点到沈阳，无处可去，只能熬到天亮再坐大客回西丰，对于我们来说，相当于在火车上坐着度过两白天＋两黑夜，很累。高兴的是，我们凌晨三点坐在沈阳北站附近麦当劳时，恰好赶上了那年世界杯的总决赛，于是和麦当劳里的球迷一起愉快的看了场世界杯。&lt;/p&gt;
+&lt;p&gt;2010年寒假，大学舍友跟我到东北玩，号称从来没坐过硬座，我直接带其体验了一把30小时硬座，由于春运车上人很多，过道都站满了人，他好像一泼尿从西安憋到了石家庄，然后一宿坐着也没睡着，结局是，这家伙发誓以后再也不坐硬座了，哈哈。那次同行的还有西电老乡，只记得我老抢她的抱枕睡觉了。&lt;/p&gt;
+&lt;p&gt;2011年，铁道部出了订票系统以后可以网上订票了，由于刚推出，很多人都不会用，可以很轻松的买到卧铺票，有了网上订票以后基本都能卧铺回家了，坐火车最后熟练到从西安到沈阳中间的站点可以依次背下来。&lt;/p&gt;
+&lt;p&gt;2012年，2013年，已经完全习惯了，长途火车也好订机票回家也好，一次火车，还是近30小时，由于走得匆忙，买了站票，带个水壶就上车了，我是一直比较喜欢轻装简行，带最少的行李出门。&lt;/p&gt;
+&lt;p&gt;在火车上，特别是长途火车，可以见到形形色色的人，听着人们聊天也是蛮有意思的一件事，因为时间很长，大家坐一块总会找些话题随便聊两句。2013年毕业以后，到北京读研，从北京回沈阳比西安近了很多，而且有动车，车次也很多，基本都有座位，非常方便。再也不需要坐30小时硬座了。&lt;/p&gt;
+&lt;p&gt;大学期间，如果不是非常时期，西安到沈阳通常都会有打折机票，提前买还是很便宜的，坐飞机也是熟悉到可以把从学校或是亲戚家到机场大巴的花式路线都摸的清清楚楚，登机时间可以控制在十分钟之内，完全不需要等。最开始还有些晕机，后来怎么坐都没感觉了。&lt;/p&gt;
+&lt;h2&gt;我的家乡&lt;/h2&gt;
+&lt;p&gt;每一年寒假过年时，家里的同学是最齐的，和同学的聊天话题，每年都在变，大一聊大学，聊专业，聊老同学，大二聊妹子，聊游戏，大三除了聊妹子和游戏外，聊聊未来计划，大四基本都在聊找工作，公务员，考研之类，毕业以后，聊工作，聊近况，开玩笑扯扯蛋。从聊天的内容就能感受到，我们都长大了。&lt;/p&gt;
+&lt;p&gt;印象很深的是，一年两次的回家，每年家乡都变了个样子，每年回家都能认出来有些不一样，最开始是哪又新开了饭店，然后一招呼就去下馆子，哪又开了网吧，哪新盖了楼，后来寇河以南建了起来，新政府搬了过去，二中也不在以前的地方，搬到了河南，也通了高速，通了火车。。。。。。这六年半，西丰在变，我们也在变。&lt;/p&gt;
+&lt;p&gt;现在，我和很多年轻人一样常年在外，每年陪伴家人的时间可能只有过年这几天，上学时还有寒暑假，工作以后，时间更少了，我想说的是，只要有时间一定要多多的陪伴家人，不要等到家人的离开，才后悔莫及。对于我，既要在外奋斗，又想在家照顾家人，总是不能同时满足，也是一种无可奈何。&lt;/p&gt;
+&lt;p&gt;同学聚会，是每逢放假必不可少的，曾在一起奋斗的同学，一块玩耍的伙伴，许久不见，满是期待。缅怀过往，畅谈现在，憧憬未来。又一次重逢，岂能不畅快痛饮几杯。&lt;/p&gt;
+&lt;p&gt;对于我假期的生活，以往来看，真是“腐败”，麻将，扑克，三国杀，玩不过来，过年在家玩“填坑”也是传统了，天天吃喝玩乐真是罪过。好了，先写这么多，想到什么以后再写，我也要开始享受我的假期了。&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Guangze Zhao</dc:creator><pubDate>Thu, 21 Jan 2016 00:00:00 +0800</pubDate><guid>tag:www.zhaoguangze.com,2016-01-21:pages/2016/01/21/hui-jia.html</guid><category>Home</category></item><item><title>OpenDayLight开发(3)-DataStoreChange监听器三种类型</title><link>http://www.zhaoguangze.com/pages/2016/01/15/opendaylightkai-fa-3-datastorechangejian-ting-qi-san-chong-lei-xing.html</link><description>&lt;p&gt;OpenDayLight中的所有数据都保存在DataStore中，并且数据以树形结构存储，可参考OpenDayLight开发(2)中的介绍。外界对DataStore的访问有BA和BI两种方式，这两种方式具有映射关系，BI像是BA的底层实现，通过QName实现对数据的索引，而BA更像是在BI上的封装，不能以BI的方式对数据进行准确的索引，但是提供了更方便的调用接口等。&lt;/p&gt;
 &lt;p&gt;&lt;img alt="映射关系" src="https://wiki.opendaylight.org/images/6/64/Arch-Fig4.jpg" /&gt;&lt;/p&gt;
 &lt;p&gt;由于数据存储在DataStore中，因此ODL中对DataStore的访问非常重要。DataStore的变化会触发DataStoreChange事件的发生，设置监听器收到变化事件后触发任务是ODL的运行机制。最近研究了三种Listener类型: DataChangeListener, DataTreeChangeListener, DomDataTreeChangeListener.&lt;/p&gt;
 &lt;h2&gt;DataChangeListener&lt;/h2&gt;
