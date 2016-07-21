@@ -60,8 +60,8 @@
 
     <div class='article'>
         <div class="content-title">
-            <a href="../pages/2016/01/15/opendaylightkai-fa-3-datastorechangejian-ting-qi-san-chong-lei-xing.html"><h1>OpenDayLight开发(3)-DataStoreChange监听器三种类型</h1></a>
-2016-01-15
+            <a href="../pages/2016/07/20/mongodbru-men.html"><h1>MongoDB入门</h1></a>
+2016-07-20
 
 by <a class="url fn" href="../author/guangze-zhao.html">Guangze Zhao</a>
  
@@ -70,7 +70,187 @@ by <a class="url fn" href="../author/guangze-zhao.html">Guangze Zhao</a>
  
         </div>
         
-        <div><p>OpenDayLight中的所有数据都保存在DataStore中，并且数据以树形结构存储，可参考OpenDayLight开发(2)中的介绍。外界对DataStore的访问有BA和BI两种方式，这两种方式具有映射关系，BI像是BA的底层实现，通过QName实现对数据的索引，而BA更像是在BI上的封装，不能以BI的方式对数据进行准确的索引，但是提供了更方便的调用接口等。</p>
+        <div><p>项目中接触到MongoDB数据库，记录下一点一滴的学习历程。</p>
+<h2>创建MongoDB连接</h2>
+<p>添加mongo库，下载mongo-java-driver.jar并导入，MongoDB中相关定义。</p>
+<div class="highlight"><pre><span class="n">MongoClient</span><span class="o">:</span> <span class="n">Mongo</span><span class="err">客户端</span>
+<span class="n">MongoDatabase</span><span class="o">:</span> <span class="n">Mongo</span><span class="err">数据库</span>
+<span class="n">MongoCollection</span><span class="o">:</span> <span class="err">数据库中的表</span>
+</pre></div>
+
+
+<p>首先创建MongoClient，由MongoClient创建数据库MongoDatabase，最后在数据库中创建collection表。如创建mydb数据库，在该数据库中创建test表。</p>
+<div class="highlight"><pre><span class="nx">MongoClient</span> <span class="n">mongoClient</span> <span class="o">=</span> <span class="nb">new</span> <span class="nx">MongoClient</span><span class="p">(</span><span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">);</span>
+<span class="nx">MongoDatabase</span> <span class="n">database</span> <span class="o">=</span> <span class="nx">mongoClient.getDatabase</span><span class="p">(</span><span class="s2">&quot;mydb&quot;</span><span class="p">);</span>
+<span class="nx">MongoCollection</span><span class="o">&lt;</span><span class="nb">Document</span><span class="o">&gt;</span> <span class="n">collection</span> <span class="o">=</span> <span class="nx">database.getCollection</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">);</span>
+</pre></div>
+
+
+<p>MongoClient实际上表示对database的一个连接池，当使用多线程时，也只需创建一个MongoClient实例。
+下面介绍MongoDB的增、删、改、查操作。MongoDB操作数据，可以通过键值对的形式保存在document对象中，然后对document对象操作。</p>
+<h2>MongoDB的增、删、改、查操作。</h2>
+<h3>增加数据</h3>
+<p>考虑将如下JSON格式的数据加入collection。</p>
+<div class="highlight"><pre><span class="p">{</span>
+    <span class="s">&quot;name&quot;</span> <span class="o">:</span> <span class="s">&quot;zhao&quot;</span><span class="p">,</span>
+    <span class="s">&quot;age&quot;</span>  <span class="o">:</span> <span class="mi">26</span>
+    <span class="s">&quot;city&quot;</span> <span class="o">:</span> <span class="s">&quot;Beijing&quot;</span><span class="p">,</span>
+    <span class="s">&quot;loc&quot;</span> <span class="o">:</span> <span class="p">{</span>
+                <span class="n">x</span> <span class="o">:</span> <span class="mf">175.23</span><span class="p">,</span>
+                <span class="n">y</span> <span class="o">:</span> <span class="mf">240.45</span>
+             <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<p>每条想要存储的数据，都保存在一个document对象中，再将document对象插入collection表中。</p>
+<div class="highlight"><pre><span class="n">Document</span> <span class="n">doc</span> <span class="o">=</span> <span class="n">new</span> <span class="n">Document</span><span class="p">(</span><span class="s">&quot;name&quot;</span><span class="p">,</span> <span class="s">&quot;Yang&quot;</span><span class="p">)</span>
+                <span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;age&quot;</span><span class="p">,</span> <span class="mi">25</span><span class="p">)</span>
+                <span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;city&quot;</span><span class="p">,</span> <span class="s">&quot;Shanghai&quot;</span><span class="p">)</span>
+                <span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;loc&quot;</span><span class="p">,</span> <span class="n">new</span> <span class="n">Document</span><span class="p">(</span><span class="s">&quot;x&quot;</span><span class="p">,</span><span class="mf">225.67</span><span class="p">).</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;y&quot;</span><span class="p">,</span> <span class="mf">140.96</span><span class="p">));</span>
+</pre></div>
+
+
+<p>将document对象插入collection。</p>
+<div class="highlight"><pre><span class="n">collection</span><span class="p">.</span><span class="n">insertOne</span><span class="p">(</span><span class="n">doc</span><span class="p">);</span>
+</pre></div>
+
+
+<p>想一次插入多条数据，可创建document对象的list。考虑将多条如下数据，插入collection中。</p>
+<div class="highlight"><pre><span class="p">{</span> <span class="s">&quot;i&quot;</span> <span class="o">:</span> <span class="n">value</span> <span class="p">}</span>
+</pre></div>
+
+
+<p>在循环中，创建document对象。</p>
+<div class="highlight"><pre><span class="nb">List</span><span class="o">&lt;</span><span class="nb">Document</span><span class="o">&gt;</span> <span class="n">list</span> <span class="o">=</span> <span class="nb">new</span> <span class="nx">ArrayList</span><span class="o">&lt;</span><span class="nb">Document</span><span class="o">&gt;</span><span class="p">();</span>
+<span class="nb">for</span><span class="p">(</span><span class="nx">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="mi">100</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">){</span>
+    <span class="nb">Document</span> <span class="n">doc</span> <span class="o">=</span> <span class="nb">new</span> <span class="nb">Document</span><span class="p">(</span><span class="s2">&quot;i&quot;</span><span class="p">,</span> <span class="nx">i</span><span class="p">);</span>
+    <span class="nx">list.add</span><span class="p">(</span><span class="nx">doc</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<p>将存有多条数据的list插入collection表中。</p>
+<div class="highlight"><pre><span class="n">collection</span><span class="p">.</span><span class="n">insertMany</span><span class="p">(</span><span class="n">list</span><span class="p">);</span>
+</pre></div>
+
+
+<h3>删除数据</h3>
+<p>调用collection.deleteOne()删除一条满足条件的数据，或collection.deleteMany()删除所有满足条件的数据,返回值类型为DeleteResult。将想要删除的数据保存在document对象中，如想删除上面例子中"name" : "MongoDB"的数据。</p>
+<div class="highlight"><pre><span class="n">Document</span> <span class="n">doc</span> <span class="o">=</span> <span class="n">new</span> <span class="n">Document</span><span class="p">(</span><span class="s">&quot;city&quot;</span><span class="p">,</span> <span class="n">new</span> <span class="n">BsonString</span><span class="p">(</span><span class="s">&quot;Beijing&quot;</span><span class="p">));</span>
+<span class="n">DeleteResult</span> <span class="n">deleteResult</span> <span class="o">=</span> <span class="n">collection</span><span class="p">.</span><span class="n">deleteOne</span><span class="p">(</span><span class="n">doc</span><span class="p">);</span>
+<span class="n">DeleteResult</span> <span class="n">deleteResult</span> <span class="o">=</span> <span class="n">collection</span><span class="p">.</span><span class="n">deleteMany</span><span class="p">(</span><span class="n">doc</span><span class="p">);</span>
+<span class="k">return</span> <span class="n">deleteResult</span><span class="p">;</span>
+</pre></div>
+
+
+<h3>更新数据</h3>
+<p>原数据和更新后的新数据，都首先保存在document对象中，通过collection.updateOne或updateMany更新。</p>
+<div class="highlight"><pre><span class="n">Document</span> <span class="n">docBefore</span> <span class="o">=</span> <span class="n">new</span> <span class="n">Document</span><span class="p">(</span><span class="s">&quot;name&quot;</span><span class="p">,</span> <span class="n">new</span> <span class="n">BsonString</span><span class="p">(</span><span class="s">&quot;nameBefore&quot;</span><span class="p">));</span>
+<span class="n">Document</span> <span class="n">docAfter</span> <span class="o">=</span> <span class="n">new</span> <span class="n">Document</span><span class="p">(</span><span class="s">&quot;name&quot;</span><span class="p">,</span> <span class="n">new</span> <span class="n">BsonString</span><span class="p">(</span><span class="s">&quot;nameAfter&quot;</span><span class="p">));</span>
+<span class="n">collection</span><span class="p">.</span><span class="n">updateMany</span><span class="p">(</span><span class="n">docBefore</span><span class="p">,</span> <span class="n">new</span> <span class="n">Document</span><span class="p">(</span><span class="s">&quot;$set&quot;</span><span class="p">,</span> <span class="n">docAfter</span><span class="p">));</span>
+</pre></div>
+
+
+<p>$set是MongoDB修改器的一种,其他修改器如:$inc/$unset/$push/$pop/...,不同修改器有各自不同的功能。</p>
+<div class="highlight"><pre><span class="err">$</span><span class="n">inc</span> <span class="o">:</span> <span class="err">对文档的某个值为数字型</span><span class="p">(</span><span class="err">只能为满足要求的数字</span><span class="p">)</span><span class="err">的键进行增减操作。</span>
+<span class="err">$</span><span class="n">set</span> <span class="o">:</span> <span class="err">用来指定一个键并更新键值，若键不存在则创建。</span>
+<span class="err">$</span><span class="n">unset</span> <span class="o">:</span> <span class="err">主要用于删除键</span>
+</pre></div>
+
+
+<h3>查询数据</h3>
+<p>想要查询的条件，存在document对象中，然后创建一个迭代器进行遍历，就可以查到所有满足查询条件的数据，创建BsonString对象，将String
+对象转成BsonString对象。比如想查询所有"city" 为 “Beijing”的数据。</p>
+<div class="highlight"><pre><span class="nb">Document</span> <span class="n">query</span> <span class="o">=</span> <span class="nb">new</span> <span class="nb">Document</span><span class="p">(</span><span class="s2">&quot;city&quot;</span><span class="p">,</span> <span class="nb">new</span> <span class="nx">BsonString</span><span class="p">(</span><span class="s2">&quot;Beijing&quot;</span><span class="p">));</span>
+<span class="nx">MongoCursor</span><span class="o">&lt;</span><span class="nb">Document</span><span class="o">&gt;</span> <span class="n">mongoCursor</span> <span class="o">=</span> <span class="nx">collection.find</span><span class="p">(</span><span class="nx">query</span><span class="p">)</span><span class="bp">.</span><span class="nb">iterator</span><span class="p">();</span>
+<span class="k">while</span><span class="p">(</span><span class="nx">mongoCursor.hasNext</span><span class="p">()){</span>
+    <span class="nb">Document</span> <span class="n">doc</span> <span class="o">=</span> <span class="nx">mongoCursor.next</span><span class="p">();</span>
+    <span class="nx">System.out.println</span><span class="p">(</span><span class="nx">doc.toJson</span><span class="p">());</span>
+<span class="p">}</span>
+<span class="err">#查询所有数据</span>
+<span class="nx">MongoCursor</span><span class="o">&lt;</span><span class="nb">Document</span><span class="o">&gt;</span> <span class="n">mongoCursor</span> <span class="o">=</span> <span class="nx">collection.find</span><span class="p">()</span><span class="bp">.</span><span class="nb">iterator</span><span class="p">();</span>
+<span class="err">#查询</span><span class="nx">limit</span><span class="err">条数据</span>
+<span class="nx">MongoCursor</span><span class="o">&lt;</span><span class="nb">Document</span><span class="o">&gt;</span> <span class="n">mongoCursor</span> <span class="o">=</span> <span class="nx">collection.find</span><span class="p">(</span><span class="nx">query</span><span class="p">)</span><span class="bp">.</span><span class="nx">limit</span><span class="p">(</span> <span class="nx">limit</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">?</span> <span class="nx">limit</span><span class="p">:</span><span class="mi">0</span><span class="p">)</span><span class="bp">.</span><span class="nb">iterator</span><span class="p">();</span>
+</pre></div>
+
+
+<h3>其他</h3>
+<p>清空表</p>
+<div class="highlight"><pre><span class="n">collection</span><span class="p">.</span><span class="n">drop</span><span class="p">();</span>
+</pre></div>
+
+
+<p>删除数据库</p>
+<div class="highlight"><pre><span class="n">database</span><span class="p">.</span><span class="n">drop</span><span class="p">();</span>
+</pre></div>
+
+
+<p>释放资源</p>
+<div class="highlight"><pre><span class="n">mongoClient</span><span class="p">.</span><span class="n">close</span><span class="p">();</span>
+</pre></div>
+
+
+<h3>将数据对象转成document对象</h3>
+<div class="highlight"><pre><span class="kt">void</span> <span class="n">Document</span> <span class="nf">makeDocument</span><span class="p">(</span><span class="n">Person</span> <span class="n">data</span><span class="p">){</span>
+    <span class="n">String</span> <span class="n">name</span> <span class="o">=</span> <span class="n">data</span><span class="p">.</span><span class="n">getName</span><span class="p">();</span>
+    <span class="kt">int</span> <span class="n">age</span> <span class="o">=</span> <span class="n">data</span><span class="p">.</span><span class="n">getAge</span><span class="p">();</span>
+    <span class="n">Double</span> <span class="n">x</span> <span class="o">=</span> <span class="n">data</span><span class="p">.</span><span class="n">getX</span><span class="p">();</span>
+    <span class="n">Double</span> <span class="n">y</span> <span class="o">=</span> <span class="n">data</span><span class="p">.</span><span class="n">getY</span><span class="p">();</span>
+    <span class="cm">/*</span>
+<span class="cm">    Document doc = new Document(&quot;name&quot;, &quot;Yang&quot;)</span>
+<span class="cm">                .append(&quot;age&quot;, 25)</span>
+<span class="cm">                .append(&quot;city&quot;, &quot;Shanghai&quot;)</span>
+<span class="cm">                .append(&quot;loc&quot;, new Document(&quot;x&quot;, x).append(&quot;y&quot;, y)); </span>
+<span class="cm">    */</span>
+    <span class="n">Document</span> <span class="n">doc</span> <span class="o">=</span> <span class="n">new</span> <span class="n">Document</span><span class="p">(</span><span class="s">&quot;name&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+                    <span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;age&quot;</span><span class="p">,</span> <span class="n">age</span><span class="p">)</span>
+                    <span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;loc&quot;</span><span class="p">,</span> <span class="n">new</span> <span class="n">BsonArray</span><span class="p">(</span><span class="n">Arrays</span><span class="p">.</span><span class="n">asList</span><span class="p">(</span><span class="n">new</span> <span class="n">BsonDouble</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">new</span> <span class="n">BsonDouble</span><span class="p">(</span><span class="n">y</span><span class="p">))));</span>                     
+    <span class="k">return</span> <span class="n">doc</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<h3>将document对象转成数据对象</h3>
+<div class="highlight"><pre><span class="kt">void</span> <span class="n">Person</span> <span class="nf">parseDocument</span><span class="p">(</span><span class="n">Document</span> <span class="n">doc</span><span class="p">){</span>
+    <span class="n">String</span> <span class="n">name</span> <span class="o">=</span> <span class="n">doc</span><span class="p">.</span><span class="n">getString</span><span class="p">(</span><span class="s">&quot;name&quot;</span><span class="p">);</span>
+    <span class="n">Integer</span> <span class="n">age</span> <span class="o">=</span> <span class="n">doc</span><span class="p">.</span><span class="n">getInteger</span><span class="p">(</span><span class="s">&quot;age&quot;</span><span class="p">);</span>
+    <span class="n">String</span> <span class="n">city</span> <span class="o">=</span> <span class="n">doc</span><span class="p">.</span><span class="n">getString</span><span class="p">(</span><span class="s">&quot;city&quot;</span><span class="p">);</span>
+    <span class="cm">/*</span>
+<span class="cm">    Document docLoc = (Document)doc.get(&quot;loc&quot;);</span>
+<span class="cm">    Double x = (Document)docLoc.get(&quot;x&quot;);</span>
+<span class="cm">    Double y = (Document)docLoc.get(&quot;y&quot;);</span>
+<span class="cm">    */</span>  
+    <span class="n">List</span> <span class="n">array</span> <span class="o">=</span> <span class="p">(</span><span class="n">List</span><span class="p">)</span><span class="n">doc</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;loc&quot;</span><span class="p">);</span>
+    <span class="n">Double</span> <span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">Double</span><span class="p">)</span><span class="n">array</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+    <span class="n">Double</span> <span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="n">Double</span><span class="p">)</span><span class="n">array</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+    <span class="k">return</span> <span class="n">new</span> <span class="n">Person</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">age</span><span class="p">,</span> <span class="n">city</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<p>相关链接请参考</p>
+<p>http://mongodb.github.io/mongo-java-driver/3.0/driver/getting-started/quick-tour/</p>
+<p>https://github.com/mongodb/mongo-java-driver/blob/3.0.x/driver/src/examples/tour/QuickTour.java</p></div>
+        <hr />
+    </div>
+		
+
+ 
+        
+
+ 
+
+    <div class='article'>
+        <a href="../pages/2016/01/15/opendaylightkai-fa-3-datastorechangejian-ting-qi-san-chong-lei-xing.html"><h2>OpenDayLight开发(3)-DataStoreChange监听器三种类型</h2></a>
+        <div class= "well small"> 2016-01-15
+
+by <a class="url fn" href="../author/guangze-zhao.html">Guangze Zhao</a>
+ 
+
+
+ </div>
+        <div class="summary"><p>OpenDayLight中的所有数据都保存在DataStore中，并且数据以树形结构存储，可参考OpenDayLight开发(2)中的介绍。外界对DataStore的访问有BA和BI两种方式，这两种方式具有映射关系，BI像是BA的底层实现，通过QName实现对数据的索引，而BA更像是在BI上的封装，不能以BI的方式对数据进行准确的索引，但是提供了更方便的调用接口等。</p>
 <p><img alt="映射关系" src="https://wiki.opendaylight.org/images/6/64/Arch-Fig4.jpg" /></p>
 <p>由于数据存储在DataStore中，因此ODL中对DataStore的访问非常重要。DataStore的变化会触发DataStoreChange事件的发生，设置监听器收到变化事件后触发任务是ODL的运行机制。最近研究了三种Listener类型: DataChangeListener, DataTreeChangeListener, DomDataTreeChangeListener.</p>
 <h2>DataChangeListener</h2>
@@ -81,65 +261,9 @@ by <a class="url fn" href="../author/guangze-zhao.html">Guangze Zhao</a>
     <span class="kd">class</span> <span class="n">VlanProvider</span> <span class="kd">implements</span> <span class="n">DataTreeChangeListener</span><span class="o">&lt;</span><span class="n">Vlan</span><span class="o">&gt;</span>
 
 <span class="n">Identifier</span><span class="o">:</span> 
-    <span class="n">InstanceIdentifier</span><span class="o">&lt;</span><span class="n">vlan</span><span class="o">&gt;</span> <span class="n">Vlan_IID</span> <span class="o">=</span> <span class="n">InstanceIdentifier</span><span class="o">.</span><span class="na">builder</span><span class="o">(</span><span class="n">Device</span><span class="o">.</span><span class="na">config</span><span class="o">.</span><span class="na">class</span><span class="o">).</span><span class="n">child</span><span class="o">(</span><span class="n">Switch</span><span class="o">.</span><span class="na">class</span><span class="o">).</span><span class="n">child</span><span class="o">(</span><span class="n">vlan</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
-
-    <span class="n">DataTreeIdentifier</span><span class="o">&lt;</span><span class="n">vlan</span><span class="o">&gt;</span> <span class="n">vlan_path</span> <span class="o">=</span> <span class="k">new</span> <span class="n">DataTreeIdentifier</span><span class="o">&lt;&gt;(</span><span class="n">LogicalDatastoreType</span><span class="o">.</span><span class="na">CONFIGURATION</span><span class="o">,</span> <span class="n">Vlan_IID</span><span class="o">);</span>
-
-<span class="n">Register</span> <span class="n">Listener</span> <span class="k">with</span> <span class="n">DataBroker</span><span class="o">:</span>
-    <span class="k">this</span><span class="o">.</span><span class="na">VlanListener</span> <span class="o">=</span> <span class="n">dataBroker</span><span class="o">.</span><span class="na">registerDataTreeChangeListener</span><span class="o">(</span><span class="n">vlan_path</span><span class="o">,</span> <span class="k">this</span><span class="o">);</span>
-</pre></div>
-
-
-<p>首先当前类实现DataTreeChangeListener接口，然后声明DataTreeIdentifier，最后注册监听器。监听函数代码如下：</p>
-<div class="highlight"><pre><span class="k">public</span> <span class="nf">void</span> <span class="nx">onDataTreeChanged</span><span class="p">(</span><span class="nx">Collection</span><span class="o">&lt;</span><span class="nx">DataTreeModification</span><span class="o">&lt;</span><span class="nx">Vlan</span><span class="o">&gt;&gt;</span> <span class="nx">changed</span><span class="p">){</span>
-
-    <span class="nb">for</span><span class="p">(</span><span class="nx">final</span> <span class="nx">DataTreeModification</span><span class="o">&lt;</span><span class="nx">Vlan</span><span class="o">&gt;</span> <span class="nx">change</span><span class="p">:</span> <span class="nx">changed</span><span class="p">){</span>
-        <span class="nx">final</span> <span class="nx">DataObjectModification</span><span class="o">&lt;</span><span class="nx">Vlan</span><span class="o">&gt;</span> <span class="n">rootChange</span> <span class="o">=</span> <span class="nx">change.getRootNode</span><span class="p">();</span>
-        <span class="nx">switch</span><span class="p">(</span><span class="nx">rootChange.getModificationType</span><span class="p">()){</span>
-            <span class="k">case</span> <span class="nb">WRITE</span><span class="p">:</span>
-                <span class="k">LOG</span><span class="bp">.</span><span class="nx">info</span><span class="p">(</span><span class="s2">&quot;Write - before : {} after : {}&quot;</span><span class="p">,</span> <span class="nx">rootChange.getDataBefore</span><span class="p">(),</span> <span class="nx">rootChange.getDataAfter</span><span class="p">());</span>
-                <span class="nx">break</span><span class="p">;</span>
-            <span class="k">case</span> <span class="nx">SUBTREE_MODIFIED</span><span class="p">:</span>
-                <span class="k">LOG</span><span class="bp">.</span><span class="nx">info</span><span class="p">(</span><span class="s2">&quot;Write - before : {} after : {}&quot;</span><span class="p">,</span> <span class="nx">rootChange.getDataBefore</span><span class="p">(),</span> <span class="nx">rootChange.getDataAfter</span><span class="p">());</span>
-                <span class="nx">break</span><span class="p">;</span>
-            <span class="k">case</span> <span class="nb">DELETE</span><span class="p">:</span>
-                <span class="k">LOG</span><span class="bp">.</span><span class="nx">info</span><span class="p">(</span><span class="s2">&quot;Write - before : {} after : {}&quot;</span><span class="p">,</span> <span class="nx">rootChange.getDataBefore</span><span class="p">(),</span> <span class="nx">rootChange.getDataAfter</span><span class="p">());</span>
-                <span class="nx">break</span><span class="p">;</span>
-        <span class="p">}</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</pre></div>
-
-
-<p>通过getRootNode()获取当前变化节点，getModificationType()获得数据树变化类型，分三种：WRITE, SUBTREE_MODIFIED, DELETE。写入，子树变化，或删除。getDataBefore()获得变化前的数据，getDataAfter()获得变化后的数据。</p>
-<h2>DOMDataTreeChangeListener</h2>
-<p>通过DOMDataBroker访问DataStore，使用Binding Independent类型，使用QName对数据树进行索引和数据的定位。相关名词：</p>
-<ul>
-<li>DOMDataBroker</li>
-<li>DOMDataWriteTransaction</li>
-<li>YangInstanceIdentifier</li>
-<li>DataTreeChange(DOMDataTreeChange)</li>
-<li>Transaction Chain</li>
-</ul>
-<p>具体代码如：</p>
-<div class="highlight"><pre><span class="n">DOMDataWriteTransaction</span> <span class="n">tx</span> <span class="o">=</span> <span class="n">domDataBroker</span><span class="p">.</span><span class="n">newWriteOnlyTransaction</span><span class="p">();</span>
-
-<span class="n">YangInstanceIdentifier</span> <span class="n">yid</span> <span class="o">=</span> <span class="n">YangInstanceIdentifier</span><span class="p">.</span><span class="n">builder</span><span class="p">().</span><span class="n">node</span><span class="p">(</span><span class="n">TestExec</span><span class="p">.</span><span class="n">QNAME</span><span class="p">).</span><span class="n">node</span><span class="p">(</span><span class="n">OuterList</span><span class="p">.</span><span class="n">QNAME</span><span class="p">).</span><span class="n">nodeWithKey</span><span class="p">(</span><span class="n">OuterList</span><span class="p">.</span><span class="n">QNAME</span><span class="p">,</span> <span class="n">element</span><span class="p">.</span><span class="n">getId</span><span class="p">()).</span><span class="n">build</span><span class="p">();</span>
-
-<span class="n">tx</span><span class="p">.</span><span class="n">put</span><span class="p">(</span><span class="n">LogicalDatastoreType</span><span class="p">.</span><span class="n">CONFIGURATION</span><span class="p">,</span> <span class="n">yid</span><span class="p">,</span> <span class="n">element</span><span class="p">);</span>
-
-<span class="n">try</span> <span class="p">{</span>
-    <span class="n">tx</span><span class="p">.</span><span class="n">submit</span><span class="p">().</span><span class="n">checkedGet</span><span class="p">();</span>
-<span class="p">}</span> <span class="n">catch</span><span class="p">(</span> <span class="n">TransactionCommitFailedException</span> <span class="n">e</span><span class="p">){</span>
-    <span class="n">LOG</span><span class="p">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;Transaction failed: {}&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">.</span><span class="n">toString</span><span class="p">());</span>
-<span class="p">}</span>
-</pre></div>
-
-
-<p>使用BI方式，通过QNAME进行索引，可对数据树中的任何位置进行精确的定位，直接获取QNAME对应位置的变化事件。</p></div>
-        <hr />
-    </div>
-		
+    <span class="n">InstanceIdentifier ...</span></pre></div> <a class="btn btn-info xsmall" href="../pages/2016/01/15/opendaylightkai-fa-3-datastorechangejian-ting-qi-san-chong-lei-xing.html">read more</a></div>
+    </div>	
+				
 
  
         

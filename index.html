@@ -60,8 +60,8 @@
 
     <div class='article'>
         <div class="content-title">
-            <a href="./pages/2016/02/23/ru-guo-you-ke-neng-zhen-de-bu-xiang-chi-kai.html"><h1>如果有可能，真的不想离开</h1></a>
-2016-02-23
+            <a href="./pages/2016/07/20/mongodbru-men.html"><h1>MongoDB入门</h1></a>
+2016-07-20
 
 by <a class="url fn" href="./author/guangze-zhao.html">Guangze Zhao</a>
  
@@ -70,12 +70,190 @@ by <a class="url fn" href="./author/guangze-zhao.html">Guangze Zhao</a>
  
         </div>
         
-        <div><p>时间2月23日下午3点半，我在沈阳回北京的高铁上，听着听着歌，突然眼泪控制不住的流下来，不为别的，只因我真的不想离开你，我的奶奶。从小在奶奶的庇护下长大的我，受到了太多奶奶给予的爱，可我又不知道能为奶奶做些什么，每年能做的只有短暂的陪伴，可离开以后，家里又只剩下奶奶自己，很难想象奶奶每天一个人在家，是一种怎样的孤独。每一次休假回家，再看到奶奶都觉着奶奶又老了，又老了，每见一次都比上一次老，老了很多。我为什么不能留在家乡呢，为什么一定要出来奋斗，是为了心中的那点不甘心，还是是为了向别人证明自己，我也不知道，或许都有，或许都不是，可对于我来说，幸福，就是亲人和朋友都在身边，我的努力可以让他们幸福，我边幸福。</p>
-<p>在家的日子，每天过得轻松，自在，开心。奶奶每天变着花样做好吃的饭菜，尽管我真的不觉着奶奶做的菜很好吃，可满满的都是幸福的味道。在家除了吃饭，奶奶遍只剩下看电视这一个事了，奶奶爱看的节目，我看不进去，就在屋里玩着电脑，没事陪奶奶上个街买个菜，看着都已经80岁的奶奶还在为几毛钱也要货比三家，孰不知在北京一杯咖啡都要30大洋。家里明明每天人很少，奶奶却还要天天收拾，这擦擦那擦擦，特别爱干净。高的地方，趁我在家，赶快帮奶奶擦擦高处的玻璃，壁橱。每天在家吃的很多，三餐是少的，每天吃好几顿饭，水果，零食，牛奶也不断，每次和奶奶逛街，都问我爱吃什么，我嘴不馋，真没什么想吃的，可还是买了很多。小时候，奶奶照顾我，吃着奶奶做的饭长大，穿着奶奶买的衣服和鞋，花着奶奶给的零花钱，那时想等我长大了，照顾奶奶，现在长大了，奶奶老了，我却不能陪在她的身边。</p>
-<p>不知道能为奶奶做些什么，不知道怎样才能尽自己一点点孝心，不能每天在家照顾奶奶，只有这短暂的不能再短暂的陪伴，我还是要在外奋斗，在外闯，为了我爱的人，为了爱我的人，何时能足够强大，何时能撑起一片天，何时才能实现我要的幸福。只求时间时间，你慢点走，让奶奶不再老去，让奶奶身体健康，留住我和奶奶在一起的时光。</p></div>
+        <div><p>项目中接触到MongoDB数据库，记录下一点一滴的学习历程。</p>
+<h2>创建MongoDB连接</h2>
+<p>添加mongo库，下载mongo-java-driver.jar并导入，MongoDB中相关定义。</p>
+<div class="highlight"><pre><span class="n">MongoClient</span><span class="o">:</span> <span class="n">Mongo</span><span class="err">客户端</span>
+<span class="n">MongoDatabase</span><span class="o">:</span> <span class="n">Mongo</span><span class="err">数据库</span>
+<span class="n">MongoCollection</span><span class="o">:</span> <span class="err">数据库中的表</span>
+</pre></div>
+
+
+<p>首先创建MongoClient，由MongoClient创建数据库MongoDatabase，最后在数据库中创建collection表。如创建mydb数据库，在该数据库中创建test表。</p>
+<div class="highlight"><pre><span class="nx">MongoClient</span> <span class="n">mongoClient</span> <span class="o">=</span> <span class="nb">new</span> <span class="nx">MongoClient</span><span class="p">(</span><span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">);</span>
+<span class="nx">MongoDatabase</span> <span class="n">database</span> <span class="o">=</span> <span class="nx">mongoClient.getDatabase</span><span class="p">(</span><span class="s2">&quot;mydb&quot;</span><span class="p">);</span>
+<span class="nx">MongoCollection</span><span class="o">&lt;</span><span class="nb">Document</span><span class="o">&gt;</span> <span class="n">collection</span> <span class="o">=</span> <span class="nx">database.getCollection</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">);</span>
+</pre></div>
+
+
+<p>MongoClient实际上表示对database的一个连接池，当使用多线程时，也只需创建一个MongoClient实例。
+下面介绍MongoDB的增、删、改、查操作。MongoDB操作数据，可以通过键值对的形式保存在document对象中，然后对document对象操作。</p>
+<h2>MongoDB的增、删、改、查操作。</h2>
+<h3>增加数据</h3>
+<p>考虑将如下JSON格式的数据加入collection。</p>
+<div class="highlight"><pre><span class="p">{</span>
+    <span class="s">&quot;name&quot;</span> <span class="o">:</span> <span class="s">&quot;zhao&quot;</span><span class="p">,</span>
+    <span class="s">&quot;age&quot;</span>  <span class="o">:</span> <span class="mi">26</span>
+    <span class="s">&quot;city&quot;</span> <span class="o">:</span> <span class="s">&quot;Beijing&quot;</span><span class="p">,</span>
+    <span class="s">&quot;loc&quot;</span> <span class="o">:</span> <span class="p">{</span>
+                <span class="n">x</span> <span class="o">:</span> <span class="mf">175.23</span><span class="p">,</span>
+                <span class="n">y</span> <span class="o">:</span> <span class="mf">240.45</span>
+             <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<p>每条想要存储的数据，都保存在一个document对象中，再将document对象插入collection表中。</p>
+<div class="highlight"><pre><span class="n">Document</span> <span class="n">doc</span> <span class="o">=</span> <span class="n">new</span> <span class="n">Document</span><span class="p">(</span><span class="s">&quot;name&quot;</span><span class="p">,</span> <span class="s">&quot;Yang&quot;</span><span class="p">)</span>
+                <span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;age&quot;</span><span class="p">,</span> <span class="mi">25</span><span class="p">)</span>
+                <span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;city&quot;</span><span class="p">,</span> <span class="s">&quot;Shanghai&quot;</span><span class="p">)</span>
+                <span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;loc&quot;</span><span class="p">,</span> <span class="n">new</span> <span class="n">Document</span><span class="p">(</span><span class="s">&quot;x&quot;</span><span class="p">,</span><span class="mf">225.67</span><span class="p">).</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;y&quot;</span><span class="p">,</span> <span class="mf">140.96</span><span class="p">));</span>
+</pre></div>
+
+
+<p>将document对象插入collection。</p>
+<div class="highlight"><pre><span class="n">collection</span><span class="p">.</span><span class="n">insertOne</span><span class="p">(</span><span class="n">doc</span><span class="p">);</span>
+</pre></div>
+
+
+<p>想一次插入多条数据，可创建document对象的list。考虑将多条如下数据，插入collection中。</p>
+<div class="highlight"><pre><span class="p">{</span> <span class="s">&quot;i&quot;</span> <span class="o">:</span> <span class="n">value</span> <span class="p">}</span>
+</pre></div>
+
+
+<p>在循环中，创建document对象。</p>
+<div class="highlight"><pre><span class="nb">List</span><span class="o">&lt;</span><span class="nb">Document</span><span class="o">&gt;</span> <span class="n">list</span> <span class="o">=</span> <span class="nb">new</span> <span class="nx">ArrayList</span><span class="o">&lt;</span><span class="nb">Document</span><span class="o">&gt;</span><span class="p">();</span>
+<span class="nb">for</span><span class="p">(</span><span class="nx">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="mi">100</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">){</span>
+    <span class="nb">Document</span> <span class="n">doc</span> <span class="o">=</span> <span class="nb">new</span> <span class="nb">Document</span><span class="p">(</span><span class="s2">&quot;i&quot;</span><span class="p">,</span> <span class="nx">i</span><span class="p">);</span>
+    <span class="nx">list.add</span><span class="p">(</span><span class="nx">doc</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<p>将存有多条数据的list插入collection表中。</p>
+<div class="highlight"><pre><span class="n">collection</span><span class="p">.</span><span class="n">insertMany</span><span class="p">(</span><span class="n">list</span><span class="p">);</span>
+</pre></div>
+
+
+<h3>删除数据</h3>
+<p>调用collection.deleteOne()删除一条满足条件的数据，或collection.deleteMany()删除所有满足条件的数据,返回值类型为DeleteResult。将想要删除的数据保存在document对象中，如想删除上面例子中"name" : "MongoDB"的数据。</p>
+<div class="highlight"><pre><span class="n">Document</span> <span class="n">doc</span> <span class="o">=</span> <span class="n">new</span> <span class="n">Document</span><span class="p">(</span><span class="s">&quot;city&quot;</span><span class="p">,</span> <span class="n">new</span> <span class="n">BsonString</span><span class="p">(</span><span class="s">&quot;Beijing&quot;</span><span class="p">));</span>
+<span class="n">DeleteResult</span> <span class="n">deleteResult</span> <span class="o">=</span> <span class="n">collection</span><span class="p">.</span><span class="n">deleteOne</span><span class="p">(</span><span class="n">doc</span><span class="p">);</span>
+<span class="n">DeleteResult</span> <span class="n">deleteResult</span> <span class="o">=</span> <span class="n">collection</span><span class="p">.</span><span class="n">deleteMany</span><span class="p">(</span><span class="n">doc</span><span class="p">);</span>
+<span class="k">return</span> <span class="n">deleteResult</span><span class="p">;</span>
+</pre></div>
+
+
+<h3>更新数据</h3>
+<p>原数据和更新后的新数据，都首先保存在document对象中，通过collection.updateOne或updateMany更新。</p>
+<div class="highlight"><pre><span class="n">Document</span> <span class="n">docBefore</span> <span class="o">=</span> <span class="n">new</span> <span class="n">Document</span><span class="p">(</span><span class="s">&quot;name&quot;</span><span class="p">,</span> <span class="n">new</span> <span class="n">BsonString</span><span class="p">(</span><span class="s">&quot;nameBefore&quot;</span><span class="p">));</span>
+<span class="n">Document</span> <span class="n">docAfter</span> <span class="o">=</span> <span class="n">new</span> <span class="n">Document</span><span class="p">(</span><span class="s">&quot;name&quot;</span><span class="p">,</span> <span class="n">new</span> <span class="n">BsonString</span><span class="p">(</span><span class="s">&quot;nameAfter&quot;</span><span class="p">));</span>
+<span class="n">collection</span><span class="p">.</span><span class="n">updateMany</span><span class="p">(</span><span class="n">docBefore</span><span class="p">,</span> <span class="n">new</span> <span class="n">Document</span><span class="p">(</span><span class="s">&quot;$set&quot;</span><span class="p">,</span> <span class="n">docAfter</span><span class="p">));</span>
+</pre></div>
+
+
+<p>$set是MongoDB修改器的一种,其他修改器如:$inc/$unset/$push/$pop/...,不同修改器有各自不同的功能。</p>
+<div class="highlight"><pre><span class="err">$</span><span class="n">inc</span> <span class="o">:</span> <span class="err">对文档的某个值为数字型</span><span class="p">(</span><span class="err">只能为满足要求的数字</span><span class="p">)</span><span class="err">的键进行增减操作。</span>
+<span class="err">$</span><span class="n">set</span> <span class="o">:</span> <span class="err">用来指定一个键并更新键值，若键不存在则创建。</span>
+<span class="err">$</span><span class="n">unset</span> <span class="o">:</span> <span class="err">主要用于删除键</span>
+</pre></div>
+
+
+<h3>查询数据</h3>
+<p>想要查询的条件，存在document对象中，然后创建一个迭代器进行遍历，就可以查到所有满足查询条件的数据，创建BsonString对象，将String
+对象转成BsonString对象。比如想查询所有"city" 为 “Beijing”的数据。</p>
+<div class="highlight"><pre><span class="nb">Document</span> <span class="n">query</span> <span class="o">=</span> <span class="nb">new</span> <span class="nb">Document</span><span class="p">(</span><span class="s2">&quot;city&quot;</span><span class="p">,</span> <span class="nb">new</span> <span class="nx">BsonString</span><span class="p">(</span><span class="s2">&quot;Beijing&quot;</span><span class="p">));</span>
+<span class="nx">MongoCursor</span><span class="o">&lt;</span><span class="nb">Document</span><span class="o">&gt;</span> <span class="n">mongoCursor</span> <span class="o">=</span> <span class="nx">collection.find</span><span class="p">(</span><span class="nx">query</span><span class="p">)</span><span class="bp">.</span><span class="nb">iterator</span><span class="p">();</span>
+<span class="k">while</span><span class="p">(</span><span class="nx">mongoCursor.hasNext</span><span class="p">()){</span>
+    <span class="nb">Document</span> <span class="n">doc</span> <span class="o">=</span> <span class="nx">mongoCursor.next</span><span class="p">();</span>
+    <span class="nx">System.out.println</span><span class="p">(</span><span class="nx">doc.toJson</span><span class="p">());</span>
+<span class="p">}</span>
+<span class="err">#查询所有数据</span>
+<span class="nx">MongoCursor</span><span class="o">&lt;</span><span class="nb">Document</span><span class="o">&gt;</span> <span class="n">mongoCursor</span> <span class="o">=</span> <span class="nx">collection.find</span><span class="p">()</span><span class="bp">.</span><span class="nb">iterator</span><span class="p">();</span>
+<span class="err">#查询</span><span class="nx">limit</span><span class="err">条数据</span>
+<span class="nx">MongoCursor</span><span class="o">&lt;</span><span class="nb">Document</span><span class="o">&gt;</span> <span class="n">mongoCursor</span> <span class="o">=</span> <span class="nx">collection.find</span><span class="p">(</span><span class="nx">query</span><span class="p">)</span><span class="bp">.</span><span class="nx">limit</span><span class="p">(</span> <span class="nx">limit</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">?</span> <span class="nx">limit</span><span class="p">:</span><span class="mi">0</span><span class="p">)</span><span class="bp">.</span><span class="nb">iterator</span><span class="p">();</span>
+</pre></div>
+
+
+<h3>其他</h3>
+<p>清空表</p>
+<div class="highlight"><pre><span class="n">collection</span><span class="p">.</span><span class="n">drop</span><span class="p">();</span>
+</pre></div>
+
+
+<p>删除数据库</p>
+<div class="highlight"><pre><span class="n">database</span><span class="p">.</span><span class="n">drop</span><span class="p">();</span>
+</pre></div>
+
+
+<p>释放资源</p>
+<div class="highlight"><pre><span class="n">mongoClient</span><span class="p">.</span><span class="n">close</span><span class="p">();</span>
+</pre></div>
+
+
+<h3>将数据对象转成document对象</h3>
+<div class="highlight"><pre><span class="kt">void</span> <span class="n">Document</span> <span class="nf">makeDocument</span><span class="p">(</span><span class="n">Person</span> <span class="n">data</span><span class="p">){</span>
+    <span class="n">String</span> <span class="n">name</span> <span class="o">=</span> <span class="n">data</span><span class="p">.</span><span class="n">getName</span><span class="p">();</span>
+    <span class="kt">int</span> <span class="n">age</span> <span class="o">=</span> <span class="n">data</span><span class="p">.</span><span class="n">getAge</span><span class="p">();</span>
+    <span class="n">Double</span> <span class="n">x</span> <span class="o">=</span> <span class="n">data</span><span class="p">.</span><span class="n">getX</span><span class="p">();</span>
+    <span class="n">Double</span> <span class="n">y</span> <span class="o">=</span> <span class="n">data</span><span class="p">.</span><span class="n">getY</span><span class="p">();</span>
+    <span class="cm">/*</span>
+<span class="cm">    Document doc = new Document(&quot;name&quot;, &quot;Yang&quot;)</span>
+<span class="cm">                .append(&quot;age&quot;, 25)</span>
+<span class="cm">                .append(&quot;city&quot;, &quot;Shanghai&quot;)</span>
+<span class="cm">                .append(&quot;loc&quot;, new Document(&quot;x&quot;, x).append(&quot;y&quot;, y)); </span>
+<span class="cm">    */</span>
+    <span class="n">Document</span> <span class="n">doc</span> <span class="o">=</span> <span class="n">new</span> <span class="n">Document</span><span class="p">(</span><span class="s">&quot;name&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+                    <span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;age&quot;</span><span class="p">,</span> <span class="n">age</span><span class="p">)</span>
+                    <span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;loc&quot;</span><span class="p">,</span> <span class="n">new</span> <span class="n">BsonArray</span><span class="p">(</span><span class="n">Arrays</span><span class="p">.</span><span class="n">asList</span><span class="p">(</span><span class="n">new</span> <span class="n">BsonDouble</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">new</span> <span class="n">BsonDouble</span><span class="p">(</span><span class="n">y</span><span class="p">))));</span>                     
+    <span class="k">return</span> <span class="n">doc</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<h3>将document对象转成数据对象</h3>
+<div class="highlight"><pre><span class="kt">void</span> <span class="n">Person</span> <span class="nf">parseDocument</span><span class="p">(</span><span class="n">Document</span> <span class="n">doc</span><span class="p">){</span>
+    <span class="n">String</span> <span class="n">name</span> <span class="o">=</span> <span class="n">doc</span><span class="p">.</span><span class="n">getString</span><span class="p">(</span><span class="s">&quot;name&quot;</span><span class="p">);</span>
+    <span class="n">Integer</span> <span class="n">age</span> <span class="o">=</span> <span class="n">doc</span><span class="p">.</span><span class="n">getInteger</span><span class="p">(</span><span class="s">&quot;age&quot;</span><span class="p">);</span>
+    <span class="n">String</span> <span class="n">city</span> <span class="o">=</span> <span class="n">doc</span><span class="p">.</span><span class="n">getString</span><span class="p">(</span><span class="s">&quot;city&quot;</span><span class="p">);</span>
+    <span class="cm">/*</span>
+<span class="cm">    Document docLoc = (Document)doc.get(&quot;loc&quot;);</span>
+<span class="cm">    Double x = (Document)docLoc.get(&quot;x&quot;);</span>
+<span class="cm">    Double y = (Document)docLoc.get(&quot;y&quot;);</span>
+<span class="cm">    */</span>  
+    <span class="n">List</span> <span class="n">array</span> <span class="o">=</span> <span class="p">(</span><span class="n">List</span><span class="p">)</span><span class="n">doc</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;loc&quot;</span><span class="p">);</span>
+    <span class="n">Double</span> <span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">Double</span><span class="p">)</span><span class="n">array</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+    <span class="n">Double</span> <span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="n">Double</span><span class="p">)</span><span class="n">array</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+    <span class="k">return</span> <span class="n">new</span> <span class="n">Person</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">age</span><span class="p">,</span> <span class="n">city</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<p>相关链接请参考</p>
+<p>http://mongodb.github.io/mongo-java-driver/3.0/driver/getting-started/quick-tour/</p>
+<p>https://github.com/mongodb/mongo-java-driver/blob/3.0.x/driver/src/examples/tour/QuickTour.java</p></div>
         <hr />
     </div>
 		
+
+ 
+        
+
+ 
+
+    <div class='article'>
+        <a href="./pages/2016/02/23/ru-guo-you-ke-neng-zhen-de-bu-xiang-chi-kai.html"><h2>如果有可能，真的不想离开</h2></a>
+        <div class= "well small"> 2016-02-23
+
+by <a class="url fn" href="./author/guangze-zhao.html">Guangze Zhao</a>
+ 
+
+
+ </div>
+        <div class="summary"><p>时间2月23日下午3点半，我在沈阳回北京的高铁上，听着听着歌，突然眼泪控制不住的流下来，不为别的，只因我真的不想离开你，我的奶奶。从小在奶奶的庇护下长大的我，受到了太多奶奶给予的爱，可我又不知道能为奶奶做些什么，每年能做的只有短暂的陪伴，可离开以后，家里又只剩下奶奶自己，很难想象奶奶每天一个人在家，是一种怎样的孤独。每一次休假回家，再看到奶奶都觉着奶奶又老了，又老了，每见一次都比上一次老，老了很多。我为什么不能留在家乡呢，为什么一定要出来奋斗，是为了心中的那点不甘心，还是是为了向别人证明自己，我也不知道，或许都有，或许都不是，可对于我来说，幸福，就是亲人和朋友都在身边，我的努力可以让他们幸福，我边幸福。</p>
+<p>在家的日子，每天过得轻松，自在，开心。奶奶每天变着花样做好吃的饭菜，尽管我真的不觉着奶奶做的菜很好吃，可满满的都是幸福的味道。在家除了吃饭，奶奶遍只剩下看电视这一个事了，奶奶爱看的节目，我看不进去，就在屋里玩着电脑，没事陪奶奶上个街买个菜，看着都已经80岁的奶奶还在为几毛钱也要货比三家，孰不知在北京一杯咖啡都要30大洋。家里明明每天人很少，奶奶却还要天天收拾，这擦擦那擦擦 ...</p> <a class="btn btn-info xsmall" href="./pages/2016/02/23/ru-guo-you-ke-neng-zhen-de-bu-xiang-chi-kai.html">read more</a></div>
+    </div>	
+				
 
  
         
@@ -180,32 +358,14 @@ by <a class="url fn" href="./author/guangze-zhao.html">Guangze Zhao</a>
 <h3>Controller ...</h3> <a class="btn btn-info xsmall" href="./pages/2016/01/09/opendaylightkai-fa-1-chu-shi-odl.html">read more</a></div>
     </div>	
 				
-
- 
-        
-
- 
-
-    <div class='article'>
-        <a href="./pages/2016/01/01/zhong-yu-you-liao-zi-ji-de-bo-ke.html"><h2>终于有了自己的博客</h2></a>
-        <div class= "well small"> 2016-01-01
-
-by <a class="url fn" href="./author/guangze-zhao.html">Guangze Zhao</a>
- 
-
-
- </div>
-        <div class="summary"><p>一直想有个属于自己的博客，今天参照着前辈的教程，总算搭起来了，在godaddy购买了顶级域名www.zhaoguangze.com，博客初步有了样子，以后要好好打理，记录自己生活的点滴，和技术的成长历程。</p>
-<p>欢迎大家访问http://www.zhaoguangze.com，进入我的世界。</p> <a class="btn btn-info xsmall" href="./pages/2016/01/01/zhong-yu-you-liao-zi-ji-de-bo-ke.html">read more</a></div>
-    </div>	
-				
 <div class="pagination">
 <ul>
     <li class="prev disabled"><a href="#">&larr; Previous</a></li>
 
     <li class="active"><a href="./index.html">1</a></li>
+    <li class=""><a href="./index2.html">2</a></li>
 
-    <li class="next disabled"><a href="#">&rarr; Next</a></li>
+    <li class="next"><a href="./index2.html">Next &rarr;</a></li>
 
 </ul>
 </div>
