@@ -60,8 +60,8 @@
 
     <div class='article'>
         <div class="content-title">
-            <a href="../pages/2016/07/20/mongodbru-men.html"><h1>MongoDB入门</h1></a>
-2016-07-20
+            <a href="../pages/2016/07/21/mongodb-shellcao-zuo.html"><h1>MongoDB-shell操作</h1></a>
+2016-07-21
 
 by <a class="url fn" href="../author/guangze-zhao.html">Guangze Zhao</a>
  
@@ -70,7 +70,209 @@ by <a class="url fn" href="../author/guangze-zhao.html">Guangze Zhao</a>
  
         </div>
         
-        <div><p>项目中接触到MongoDB数据库，记录下一点一滴的学习历程。</p>
+        <div><p>本篇主要介绍Linux环境下MongoDB的安装和shell基本操作。</p>
+<h2>安装并启动MongoDB</h2>
+<p>下载MongoDB安装包，MongoDB版本Linux 64-bit legacy。</p>
+<div class="highlight"><pre><span class="n">wget</span> <span class="n">https</span><span class="o">:</span><span class="c1">//fastdl.mongodb.org/linux/mongodb-linux-x86_64-3.2.8.tgz</span>
+
+<span class="n">tar</span> <span class="n">zxf</span> <span class="n">mongodb</span><span class="o">-</span><span class="n">linux</span><span class="o">-</span><span class="n">x86_64</span><span class="o">-</span><span class="mf">3.2.8</span><span class="p">.</span><span class="n">tgz</span>
+</pre></div>
+
+
+<p>移动到安装目录</p>
+<div class="highlight"><pre><span class="n">mv</span> <span class="n">mongodb</span><span class="o">-</span><span class="n">linux</span><span class="o">-</span><span class="n">x86_64</span><span class="o">-</span><span class="mf">3.2.8</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">mongodb</span>
+</pre></div>
+
+
+<p>创建数据库文件夹和日志文件</p>
+<div class="highlight"><pre><span class="n">mkdir</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">mongodb</span><span class="o">/</span><span class="n">data</span>
+<span class="n">touch</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">mongodb</span><span class="o">/</span><span class="n">logs</span>
+</pre></div>
+
+
+<p>创建软链接</p>
+<div class="highlight"><pre><span class="n">ln</span> <span class="o">-</span><span class="n">s</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">mongodb</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">mongo</span> <span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">mongo</span>
+</pre></div>
+
+
+<p>设置开机自启动</p>
+<div class="highlight"><pre><span class="n">echo</span> <span class="s">&quot;/usr/local/mongodb/bin/mongod --dbpath=/usr/local/mongodb/data --logpath=/usr/local/mongodb/logs --logappend --port=27017 --fork&quot;</span> <span class="o">&gt;&gt;</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">rc</span><span class="p">.</span><span class="n">local</span>
+</pre></div>
+
+
+<p>启动MongoDB</p>
+<div class="highlight"><pre><span class="mf">1.</span><span class="err">需要用户名和密码</span>
+<span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">mongodb</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">mongod</span> <span class="o">--</span><span class="n">dbpath</span><span class="o">=/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">mongodb</span><span class="o">/</span><span class="n">data</span> <span class="o">--</span><span class="n">logpath</span><span class="o">=/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">mongodb</span><span class="o">/</span><span class="n">logs</span> <span class="o">--</span><span class="n">logappend</span> <span class="o">--</span><span class="n">auth</span> <span class="o">--</span><span class="n">port</span><span class="o">=</span><span class="mi">27017</span> <span class="o">--</span><span class="n">fork</span>
+<span class="mf">2.</span><span class="err">不需要密码</span>
+<span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">mongodb</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">mongod</span> <span class="o">--</span><span class="n">dbpath</span><span class="o">=/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">mongodb</span><span class="o">/</span><span class="n">data</span> <span class="o">--</span><span class="n">logpath</span><span class="o">=/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">mongodb</span><span class="o">/</span><span class="n">logs</span> <span class="o">--</span><span class="n">logappend</span> <span class="o">--</span><span class="n">port</span><span class="o">=</span><span class="mi">27017</span> <span class="o">--</span><span class="n">fork</span>
+</pre></div>
+
+
+<p>相关参数</p>
+<div class="highlight"><pre><span class="o">--</span><span class="n">dbpath</span> <span class="err">数据库路径</span><span class="p">(</span><span class="err">数据文件</span><span class="p">)</span>
+<span class="o">--</span><span class="n">logpath</span> <span class="err">日志文件路径</span>
+<span class="o">--</span><span class="n">logappend</span> <span class="err">日志文件末尾添加</span>
+<span class="o">--</span><span class="n">port</span> <span class="err">启用端口号</span>
+<span class="o">--</span><span class="n">fork</span> <span class="err">在后台运行</span>
+<span class="o">--</span><span class="n">auth</span> <span class="err">是否需要验证权限登陆</span><span class="p">(</span><span class="err">用户名和密码</span><span class="p">)</span>
+</pre></div>
+
+
+<p>检测是否已启动</p>
+<div class="highlight"><pre><span class="n">netstat</span> <span class="o">-</span><span class="n">nlp</span> <span class="o">|</span> <span class="n">grep</span> <span class="mi">27017</span>
+</pre></div>
+
+
+<p>通过shell进入数据库</p>
+<div class="highlight"><pre><span class="p">[</span><span class="n">root</span><span class="err">@</span><span class="n">localhost</span> <span class="n">mongodb</span><span class="p">]</span><span class="err">#</span><span class="p">.</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">mongo</span>
+<span class="n">MongoDB</span> <span class="n">shell</span> <span class="n">version</span><span class="o">:</span> <span class="mf">3.2.8</span>
+<span class="n">connecting</span> <span class="n">to</span><span class="o">:</span> <span class="n">test</span>
+<span class="o">&gt;</span>
+</pre></div>
+
+
+<h2>通过shell操作MongoDB</h2>
+<h3>数据库database相关操作</h3>
+<div class="highlight"><pre><span class="mf">1.</span><span class="err">查看命令提示</span><span class="n">help</span>
+<span class="o">&gt;</span><span class="n">db</span><span class="p">.</span><span class="n">help</span><span class="p">()</span>  
+<span class="mf">2.</span><span class="err">查询所有数据库</span>
+<span class="o">&gt;</span><span class="n">show</span> <span class="n">dbs</span>
+<span class="mf">3.</span><span class="err">切换</span><span class="o">/</span><span class="err">创建数据库</span>
+<span class="o">&gt;</span><span class="n">use</span> <span class="n">myDB</span>
+<span class="mf">4.</span><span class="err">查看当前使用的数据库名</span>
+<span class="o">&gt;</span><span class="n">db</span>
+<span class="o">&gt;</span><span class="n">db</span><span class="p">.</span><span class="n">getName</span><span class="p">()</span>   
+<span class="mf">5.</span><span class="err">删除当前使用数据库</span>
+<span class="o">&gt;</span><span class="n">db</span><span class="p">.</span><span class="n">dropDatabase</span><span class="p">()</span>
+<span class="mf">6.</span><span class="err">将本机数据库</span><span class="n">myDB</span><span class="err">中的数据复制到</span><span class="n">tempDB</span><span class="err">数据库</span>
+<span class="o">&gt;</span><span class="n">db</span><span class="p">.</span><span class="n">copyDatabase</span><span class="p">(</span><span class="s">&quot;myDB&quot;</span><span class="p">,</span> <span class="s">&quot;temp&quot;</span><span class="p">,</span> <span class="s">&quot;127.0.0.1&quot;</span><span class="p">)</span>
+<span class="mf">7.</span><span class="err">修复当前数据库</span>
+<span class="o">&gt;</span><span class="n">db</span><span class="p">.</span><span class="n">repairDatabase</span><span class="p">()</span>
+<span class="mf">8.</span><span class="err">显示当前数据库状态</span>
+<span class="o">&gt;</span><span class="n">db</span><span class="p">.</span><span class="n">stats</span><span class="p">()</span>
+<span class="mf">9.</span><span class="err">当前数据库版本</span>
+<span class="o">&gt;</span><span class="n">db</span><span class="p">.</span><span class="n">version</span>
+<span class="mf">10.</span><span class="err">查看当前</span><span class="n">db</span><span class="err">的链接机器地址</span>
+<span class="o">&gt;</span><span class="n">db</span><span class="p">.</span><span class="n">getMongo</span><span class="p">()</span>
+</pre></div>
+
+
+<h3>集合collection相关操作</h3>
+<div class="highlight"><pre><span class="mf">1.</span><span class="err">查看当前数据库的所有集合</span>
+<span class="o">&gt;</span><span class="n">db</span><span class="p">.</span><span class="n">getCollectionNames</span><span class="p">()</span>
+<span class="mf">2.</span><span class="err">查询帮助</span><span class="n">help</span>
+<span class="o">&gt;</span><span class="n">db</span><span class="p">.</span><span class="n">colName</span><span class="p">.</span><span class="n">help</span><span class="p">()</span>
+<span class="mf">2.</span><span class="err">查询集合</span><span class="n">colName</span><span class="err">中所有数据</span>
+<span class="o">&gt;</span><span class="n">db</span><span class="p">.</span><span class="n">colName</span><span class="p">.</span><span class="n">find</span><span class="p">()</span>
+<span class="mf">3.</span><span class="err">查询集合</span><span class="n">colName</span><span class="err">中数据量</span>
+<span class="o">&gt;</span><span class="n">db</span><span class="p">.</span><span class="n">colName</span><span class="p">.</span><span class="n">count</span><span class="p">()</span>
+<span class="mf">4.</span><span class="err">显示当前数据库所有集合状态</span>
+<span class="o">&gt;</span><span class="n">db</span><span class="p">.</span><span class="n">printCollectionStats</span><span class="p">()</span>
+<span class="mf">5.</span><span class="err">查看数据空间大小</span>
+<span class="o">&gt;</span><span class="n">db</span><span class="p">.</span><span class="n">colName</span><span class="p">.</span><span class="n">dataSize</span><span class="p">()</span>
+<span class="mf">6.</span><span class="err">查看集合总大小</span>
+<span class="o">&gt;</span><span class="n">db</span><span class="p">.</span><span class="n">colName</span><span class="p">.</span><span class="n">totalSize</span><span class="p">()</span>
+<span class="mf">7.</span><span class="err">查看集合存储空间大小</span>
+<span class="o">&gt;</span><span class="n">db</span><span class="p">.</span><span class="n">colName</span><span class="p">.</span><span class="n">storageSize</span><span class="p">()</span>
+<span class="mf">8.</span><span class="err">显示当前集合状态</span>
+<span class="o">&gt;</span><span class="n">db</span><span class="p">.</span><span class="n">colName</span><span class="p">.</span><span class="n">stats</span><span class="p">()</span>
+<span class="mf">9.</span><span class="err">集合重命名</span>
+<span class="o">&gt;</span><span class="n">db</span><span class="p">.</span><span class="n">colName</span><span class="p">.</span><span class="n">renameCollection</span><span class="p">(</span><span class="s">&quot;colRename&quot;</span><span class="p">)</span>
+<span class="mf">10.</span><span class="err">删除当前集合</span>
+<span class="o">&gt;</span><span class="n">db</span><span class="p">.</span><span class="n">colName</span><span class="p">.</span><span class="n">drop</span><span class="p">()</span>
+</pre></div>
+
+
+<h3>数据的增、删、改、查操作</h3>
+<p>查询数据</p>
+<div class="highlight"><pre><span class="mf">1.</span><span class="err">查询所有记录</span>
+<span class="o">&gt;</span><span class="n">db</span><span class="p">.</span><span class="n">colName</span><span class="p">.</span><span class="n">find</span><span class="p">()</span>
+<span class="mf">2.</span><span class="err">查询过滤掉重复数据的某列数据</span>
+<span class="o">&gt;</span><span class="n">db</span><span class="p">.</span><span class="n">colName</span><span class="p">.</span><span class="n">distinct</span><span class="p">(</span><span class="s">&quot;name&quot;</span><span class="p">)</span>
+<span class="mf">3.</span><span class="err">查询</span><span class="n">age</span><span class="err">＝</span><span class="mi">24</span><span class="err">的记录</span>
+<span class="o">&gt;</span><span class="n">db</span><span class="p">.</span><span class="n">colName</span><span class="p">.</span><span class="n">find</span><span class="p">({</span><span class="s">&quot;age&quot;</span><span class="o">:</span><span class="mi">24</span><span class="p">})</span>
+<span class="mf">4.</span><span class="err">查询</span><span class="n">age</span><span class="o">&gt;</span><span class="mi">24</span><span class="err">的记录</span>
+<span class="o">&gt;</span><span class="n">db</span><span class="p">.</span><span class="n">colName</span><span class="p">.</span><span class="n">find</span><span class="p">({</span><span class="s">&quot;age&quot;</span><span class="o">:</span><span class="p">{</span><span class="err">$</span><span class="n">gt</span><span class="o">:</span><span class="mi">24</span><span class="p">}})</span>
+  <span class="err">查询</span><span class="n">age</span><span class="o">&gt;=</span><span class="mi">24</span><span class="err">的记录</span>
+<span class="o">&gt;</span><span class="n">db</span><span class="p">.</span><span class="n">colName</span><span class="p">.</span><span class="n">find</span><span class="p">({</span><span class="s">&quot;age&quot;</span><span class="o">:</span><span class="p">{</span><span class="err">$</span><span class="n">gte</span><span class="o">:</span><span class="mi">24</span><span class="p">}})</span>
+  <span class="err">查询</span><span class="n">age</span><span class="o">&lt;</span><span class="mi">24</span><span class="err">的记录</span>
+<span class="o">&gt;</span><span class="n">db</span><span class="p">.</span><span class="n">colName</span><span class="p">.</span><span class="n">find</span><span class="p">({</span><span class="s">&quot;age&quot;</span><span class="o">:</span><span class="p">{</span><span class="err">$</span><span class="n">lt</span><span class="o">:</span><span class="mi">24</span><span class="p">}})</span>
+  <span class="err">查询</span><span class="n">age</span><span class="o">&lt;=</span><span class="mi">24</span><span class="err">的记录</span>
+<span class="o">&gt;</span><span class="n">db</span><span class="p">.</span><span class="n">colName</span><span class="p">.</span><span class="n">find</span><span class="p">({</span><span class="s">&quot;age&quot;</span><span class="o">:</span><span class="p">{</span><span class="err">$</span><span class="n">lte</span><span class="o">:</span><span class="mi">24</span><span class="p">}})</span>
+  <span class="err">查询</span><span class="mi">22</span><span class="o">&lt;=</span><span class="n">age</span><span class="o">&lt;=</span><span class="mi">26</span><span class="err">的记录</span>
+<span class="o">&gt;</span><span class="n">db</span><span class="p">.</span><span class="n">colName</span><span class="p">.</span><span class="n">find</span><span class="p">({</span><span class="s">&quot;age&quot;</span><span class="o">:</span><span class="p">{</span><span class="err">$</span><span class="n">gte</span><span class="o">:</span><span class="mi">22</span><span class="p">,</span> <span class="err">$</span><span class="n">lte</span><span class="o">:</span><span class="mi">26</span><span class="p">}})</span>
+<span class="mf">5.</span><span class="err">查询</span><span class="n">name</span><span class="err">中包含</span><span class="n">mongo</span><span class="err">的数据</span>
+<span class="o">&gt;</span><span class="n">db</span><span class="p">.</span><span class="n">colName</span><span class="p">.</span><span class="n">find</span><span class="p">({</span><span class="n">name</span><span class="o">:/</span><span class="n">mongo</span><span class="o">/</span><span class="p">})</span>
+<span class="err">相当于</span> <span class="n">select</span> <span class="o">*</span> <span class="n">from</span> <span class="n">colName</span> <span class="n">where</span> <span class="n">name</span> <span class="n">like</span> <span class="err">&#39;</span><span class="o">%</span><span class="n">mongo</span><span class="o">%</span><span class="err">&#39;</span>
+<span class="mf">6.</span><span class="err">查询</span><span class="n">name</span><span class="err">中以</span><span class="n">mongo</span><span class="err">开头的数据</span>
+<span class="o">&gt;</span><span class="n">db</span><span class="p">.</span><span class="n">colName</span><span class="p">.</span><span class="n">find</span><span class="p">({</span><span class="n">name</span><span class="o">:/^</span><span class="n">mongo</span><span class="o">/</span><span class="p">})</span>
+<span class="err">相当于</span> <span class="n">select</span> <span class="o">*</span> <span class="n">from</span> <span class="n">colName</span> <span class="n">where</span> <span class="n">name</span> <span class="n">like</span> <span class="err">&#39;</span><span class="n">mongo</span><span class="o">%</span><span class="err">&#39;</span>
+<span class="mf">7.</span><span class="err">查询指定列</span><span class="n">name</span><span class="err">、</span><span class="n">age</span><span class="err">数据</span>
+<span class="o">&gt;</span><span class="n">db</span><span class="p">.</span><span class="n">colName</span><span class="p">.</span><span class="n">find</span><span class="p">({},</span> <span class="p">{</span><span class="n">name</span><span class="o">:</span><span class="mi">1</span><span class="p">,</span> <span class="n">age</span><span class="o">:</span><span class="mi">1</span><span class="p">})</span>
+<span class="err">相当于</span> <span class="n">select</span> <span class="n">name</span><span class="p">,</span><span class="n">age</span> <span class="n">from</span> <span class="n">colName</span>
+<span class="n">name</span><span class="err">也可以用</span><span class="nb">true</span><span class="err">或</span><span class="nb">false</span><span class="p">,</span><span class="err">当用</span><span class="n">ture</span><span class="err">的情况下河</span><span class="n">name</span><span class="o">:</span><span class="mi">1</span><span class="err">效果一样，如果用</span><span class="nb">false</span><span class="err">就是排除</span><span class="n">name</span><span class="err">，显示</span><span class="n">name</span><span class="err">以外的列信息</span>
+</pre></div>
+
+
+<p>添加数据</p>
+<div class="highlight"><pre><span class="o">&gt;</span><span class="n">db</span><span class="p">.</span><span class="n">colName</span><span class="p">.</span><span class="n">save</span><span class="p">({</span><span class="n">name</span><span class="o">:</span><span class="s">&quot;zhang&quot;</span><span class="p">,</span> <span class="n">age</span><span class="o">:</span><span class="mi">25</span><span class="p">,</span> <span class="n">log</span><span class="o">:</span><span class="p">{</span><span class="n">x</span><span class="o">:</span><span class="mi">123</span><span class="p">,</span><span class="n">y</span><span class="o">:</span><span class="mi">22</span><span class="p">}})</span>
+</pre></div>
+
+
+<p>更新数据</p>
+<div class="highlight"><pre><span class="o">&gt;</span><span class="n">db</span><span class="p">.</span><span class="n">colName</span><span class="p">.</span><span class="n">update</span><span class="p">({</span><span class="n">age</span><span class="o">:</span><span class="mi">25</span><span class="p">},</span> <span class="p">{</span><span class="err">$</span><span class="n">set</span> <span class="o">:</span> <span class="p">{</span><span class="n">name</span><span class="o">:</span> <span class="err">&#39;</span><span class="n">changeName</span><span class="err">&#39;</span><span class="p">}},</span> <span class="nb">false</span><span class="p">,</span> <span class="nb">true</span><span class="p">)</span>
+<span class="err">相当于</span> <span class="n">update</span> <span class="n">colName</span> <span class="n">set</span> <span class="n">name</span><span class="o">=</span><span class="err">&#39;</span><span class="n">changeName</span><span class="err">&#39;</span> <span class="n">where</span> <span class="n">age</span><span class="o">=</span><span class="mi">25</span>
+<span class="o">&gt;</span><span class="n">db</span><span class="p">.</span><span class="n">colName</span><span class="p">.</span><span class="n">update</span><span class="p">({</span><span class="n">name</span><span class="o">:</span><span class="err">&#39;</span><span class="n">Li</span><span class="err">&#39;</span><span class="p">},</span> <span class="p">{</span><span class="err">$</span><span class="n">inc</span><span class="o">:</span><span class="p">{</span><span class="n">age</span><span class="o">:</span><span class="mi">10</span><span class="p">},</span> <span class="err">$</span><span class="n">set</span><span class="o">:</span><span class="p">{</span><span class="n">name</span><span class="o">:</span><span class="err">&#39;</span><span class="n">Lin</span><span class="err">&#39;</span><span class="p">}},</span> <span class="nb">false</span><span class="p">,</span> <span class="nb">true</span><span class="p">)</span>
+<span class="err">相当于</span> <span class="n">update</span> <span class="n">colName</span> <span class="n">set</span> <span class="n">age</span> <span class="o">=</span> <span class="n">age</span> <span class="o">+</span> <span class="mi">10</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span> <span class="err">&#39;</span><span class="n">Lin</span><span class="err">&#39;</span> <span class="n">where</span> <span class="n">name</span> <span class="o">=</span> <span class="err">&#39;</span><span class="n">Li</span><span class="err">&#39;</span>
+</pre></div>
+
+
+<p>删除数据</p>
+<div class="highlight"><pre><span class="o">&gt;</span><span class="n">db</span><span class="p">.</span><span class="n">colName</span><span class="p">.</span><span class="n">remove</span><span class="p">({</span><span class="n">age</span><span class="o">:</span><span class="mi">25</span><span class="p">})</span>
+</pre></div>
+
+
+<h3>用户相关操作</h3>
+<div class="highlight"><pre><span class="mf">1.</span><span class="err">添加用户</span><span class="p">,</span><span class="err">密码</span><span class="p">,</span><span class="err">是否只读</span>
+<span class="o">&gt;</span><span class="n">db</span><span class="p">.</span><span class="n">addUser</span><span class="p">(</span><span class="s">&quot;userName&quot;</span><span class="p">,</span> <span class="s">&quot;passwd&quot;</span><span class="p">,</span> <span class="nb">true</span><span class="p">)</span>
+<span class="mf">2.</span><span class="err">数据库认证、安全模式</span>
+<span class="o">&gt;</span><span class="n">db</span><span class="p">.</span><span class="n">auth</span><span class="p">(</span><span class="s">&quot;userName&quot;</span><span class="p">,</span> <span class="s">&quot;passwd&quot;</span><span class="p">)</span>
+<span class="mf">3.</span><span class="err">显示当前所有用户</span>
+<span class="o">&gt;</span><span class="n">show</span> <span class="n">users</span>
+<span class="mf">4.</span><span class="err">删除用户</span>
+<span class="o">&gt;</span><span class="n">db</span><span class="p">.</span><span class="n">removeUsers</span><span class="p">(</span><span class="s">&quot;userName&quot;</span><span class="p">)</span>
+</pre></div>
+
+
+<h3>其他</h3>
+<div class="highlight"><pre><span class="mf">1.</span><span class="err">查询之前的错误信息</span>
+<span class="n">db</span><span class="p">.</span><span class="n">getPrevError</span><span class="p">()</span>
+<span class="mf">2.</span><span class="err">清除错误记录</span>
+<span class="n">db</span><span class="p">.</span><span class="n">resetError</span><span class="p">()</span>
+</pre></div>
+
+
+<p>相关参考</p>
+<p>https://docs.mongodb.com/manual/mongo/</p></div>
+        <hr />
+    </div>
+		
+
+ 
+        
+
+ 
+
+    <div class='article'>
+        <a href="../pages/2016/07/20/mongodbru-men.html"><h2>MongoDB入门</h2></a>
+        <div class= "well small"> 2016-07-20
+
+by <a class="url fn" href="../author/guangze-zhao.html">Guangze Zhao</a>
+ 
+
+
+ </div>
+        <div class="summary"><p>项目中接触到MongoDB数据库，记录下一点一滴的学习历程。</p>
 <h2>创建MongoDB连接</h2>
 <p>添加mongo库，下载mongo-java-driver.jar并导入，MongoDB中相关定义。</p>
 <div class="highlight"><pre><span class="n">MongoClient</span><span class="o">:</span> <span class="n">Mongo</span><span class="err">客户端</span>
@@ -88,153 +290,9 @@ by <a class="url fn" href="../author/guangze-zhao.html">Guangze Zhao</a>
 
 <p>MongoClient实际上表示对database的一个连接池，当使用多线程时，也只需创建一个MongoClient实例。
 下面介绍MongoDB的增、删、改、查操作。MongoDB操作数据，可以通过键值对的形式保存在document对象中，然后对document对象操作。</p>
-<h2>MongoDB的增、删、改、查操作。</h2>
-<h3>增加数据</h3>
-<p>考虑将如下JSON格式的数据加入collection。</p>
-<div class="highlight"><pre><span class="p">{</span>
-    <span class="s">&quot;name&quot;</span> <span class="o">:</span> <span class="s">&quot;zhao&quot;</span><span class="p">,</span>
-    <span class="s">&quot;age&quot;</span>  <span class="o">:</span> <span class="mi">26</span>
-    <span class="s">&quot;city&quot;</span> <span class="o">:</span> <span class="s">&quot;Beijing&quot;</span><span class="p">,</span>
-    <span class="s">&quot;loc&quot;</span> <span class="o">:</span> <span class="p">{</span>
-                <span class="n">x</span> <span class="o">:</span> <span class="mf">175.23</span><span class="p">,</span>
-                <span class="n">y</span> <span class="o">:</span> <span class="mf">240.45</span>
-             <span class="p">}</span>
-<span class="p">}</span>
-</pre></div>
-
-
-<p>每条想要存储的数据，都保存在一个document对象中，再将document对象插入collection表中。</p>
-<div class="highlight"><pre><span class="n">Document</span> <span class="n">doc</span> <span class="o">=</span> <span class="n">new</span> <span class="n">Document</span><span class="p">(</span><span class="s">&quot;name&quot;</span><span class="p">,</span> <span class="s">&quot;Yang&quot;</span><span class="p">)</span>
-                <span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;age&quot;</span><span class="p">,</span> <span class="mi">25</span><span class="p">)</span>
-                <span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;city&quot;</span><span class="p">,</span> <span class="s">&quot;Shanghai&quot;</span><span class="p">)</span>
-                <span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;loc&quot;</span><span class="p">,</span> <span class="n">new</span> <span class="n">Document</span><span class="p">(</span><span class="s">&quot;x&quot;</span><span class="p">,</span><span class="mf">225.67</span><span class="p">).</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;y&quot;</span><span class="p">,</span> <span class="mf">140.96</span><span class="p">));</span>
-</pre></div>
-
-
-<p>将document对象插入collection。</p>
-<div class="highlight"><pre><span class="n">collection</span><span class="p">.</span><span class="n">insertOne</span><span class="p">(</span><span class="n">doc</span><span class="p">);</span>
-</pre></div>
-
-
-<p>想一次插入多条数据，可创建document对象的list。考虑将多条如下数据，插入collection中。</p>
-<div class="highlight"><pre><span class="p">{</span> <span class="s">&quot;i&quot;</span> <span class="o">:</span> <span class="n">value</span> <span class="p">}</span>
-</pre></div>
-
-
-<p>在循环中，创建document对象。</p>
-<div class="highlight"><pre><span class="nb">List</span><span class="o">&lt;</span><span class="nb">Document</span><span class="o">&gt;</span> <span class="n">list</span> <span class="o">=</span> <span class="nb">new</span> <span class="nx">ArrayList</span><span class="o">&lt;</span><span class="nb">Document</span><span class="o">&gt;</span><span class="p">();</span>
-<span class="nb">for</span><span class="p">(</span><span class="nx">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="mi">100</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">){</span>
-    <span class="nb">Document</span> <span class="n">doc</span> <span class="o">=</span> <span class="nb">new</span> <span class="nb">Document</span><span class="p">(</span><span class="s2">&quot;i&quot;</span><span class="p">,</span> <span class="nx">i</span><span class="p">);</span>
-    <span class="nx">list.add</span><span class="p">(</span><span class="nx">doc</span><span class="p">);</span>
-<span class="p">}</span>
-</pre></div>
-
-
-<p>将存有多条数据的list插入collection表中。</p>
-<div class="highlight"><pre><span class="n">collection</span><span class="p">.</span><span class="n">insertMany</span><span class="p">(</span><span class="n">list</span><span class="p">);</span>
-</pre></div>
-
-
-<h3>删除数据</h3>
-<p>调用collection.deleteOne()删除一条满足条件的数据，或collection.deleteMany()删除所有满足条件的数据,返回值类型为DeleteResult。将想要删除的数据保存在document对象中，如想删除上面例子中"name" : "MongoDB"的数据。</p>
-<div class="highlight"><pre><span class="n">Document</span> <span class="n">doc</span> <span class="o">=</span> <span class="n">new</span> <span class="n">Document</span><span class="p">(</span><span class="s">&quot;city&quot;</span><span class="p">,</span> <span class="n">new</span> <span class="n">BsonString</span><span class="p">(</span><span class="s">&quot;Beijing&quot;</span><span class="p">));</span>
-<span class="n">DeleteResult</span> <span class="n">deleteResult</span> <span class="o">=</span> <span class="n">collection</span><span class="p">.</span><span class="n">deleteOne</span><span class="p">(</span><span class="n">doc</span><span class="p">);</span>
-<span class="n">DeleteResult</span> <span class="n">deleteResult</span> <span class="o">=</span> <span class="n">collection</span><span class="p">.</span><span class="n">deleteMany</span><span class="p">(</span><span class="n">doc</span><span class="p">);</span>
-<span class="k">return</span> <span class="n">deleteResult</span><span class="p">;</span>
-</pre></div>
-
-
-<h3>更新数据</h3>
-<p>原数据和更新后的新数据，都首先保存在document对象中，通过collection.updateOne或updateMany更新。</p>
-<div class="highlight"><pre><span class="n">Document</span> <span class="n">docBefore</span> <span class="o">=</span> <span class="n">new</span> <span class="n">Document</span><span class="p">(</span><span class="s">&quot;name&quot;</span><span class="p">,</span> <span class="n">new</span> <span class="n">BsonString</span><span class="p">(</span><span class="s">&quot;nameBefore&quot;</span><span class="p">));</span>
-<span class="n">Document</span> <span class="n">docAfter</span> <span class="o">=</span> <span class="n">new</span> <span class="n">Document</span><span class="p">(</span><span class="s">&quot;name&quot;</span><span class="p">,</span> <span class="n">new</span> <span class="n">BsonString</span><span class="p">(</span><span class="s">&quot;nameAfter&quot;</span><span class="p">));</span>
-<span class="n">collection</span><span class="p">.</span><span class="n">updateMany</span><span class="p">(</span><span class="n">docBefore</span><span class="p">,</span> <span class="n">new</span> <span class="n">Document</span><span class="p">(</span><span class="s">&quot;$set&quot;</span><span class="p">,</span> <span class="n">docAfter</span><span class="p">));</span>
-</pre></div>
-
-
-<p>$set是MongoDB修改器的一种,其他修改器如:$inc/$unset/$push/$pop/...,不同修改器有各自不同的功能。</p>
-<div class="highlight"><pre><span class="err">$</span><span class="n">inc</span> <span class="o">:</span> <span class="err">对文档的某个值为数字型</span><span class="p">(</span><span class="err">只能为满足要求的数字</span><span class="p">)</span><span class="err">的键进行增减操作。</span>
-<span class="err">$</span><span class="n">set</span> <span class="o">:</span> <span class="err">用来指定一个键并更新键值，若键不存在则创建。</span>
-<span class="err">$</span><span class="n">unset</span> <span class="o">:</span> <span class="err">主要用于删除键</span>
-</pre></div>
-
-
-<h3>查询数据</h3>
-<p>想要查询的条件，存在document对象中，然后创建一个迭代器进行遍历，就可以查到所有满足查询条件的数据，创建BsonString对象，将String
-对象转成BsonString对象。比如想查询所有"city" 为 “Beijing”的数据。</p>
-<div class="highlight"><pre><span class="nb">Document</span> <span class="n">query</span> <span class="o">=</span> <span class="nb">new</span> <span class="nb">Document</span><span class="p">(</span><span class="s2">&quot;city&quot;</span><span class="p">,</span> <span class="nb">new</span> <span class="nx">BsonString</span><span class="p">(</span><span class="s2">&quot;Beijing&quot;</span><span class="p">));</span>
-<span class="nx">MongoCursor</span><span class="o">&lt;</span><span class="nb">Document</span><span class="o">&gt;</span> <span class="n">mongoCursor</span> <span class="o">=</span> <span class="nx">collection.find</span><span class="p">(</span><span class="nx">query</span><span class="p">)</span><span class="bp">.</span><span class="nb">iterator</span><span class="p">();</span>
-<span class="k">while</span><span class="p">(</span><span class="nx">mongoCursor.hasNext</span><span class="p">()){</span>
-    <span class="nb">Document</span> <span class="n">doc</span> <span class="o">=</span> <span class="nx">mongoCursor.next</span><span class="p">();</span>
-    <span class="nx">System.out.println</span><span class="p">(</span><span class="nx">doc.toJson</span><span class="p">());</span>
-<span class="p">}</span>
-<span class="err">#查询所有数据</span>
-<span class="nx">MongoCursor</span><span class="o">&lt;</span><span class="nb">Document</span><span class="o">&gt;</span> <span class="n">mongoCursor</span> <span class="o">=</span> <span class="nx">collection.find</span><span class="p">()</span><span class="bp">.</span><span class="nb">iterator</span><span class="p">();</span>
-<span class="err">#查询</span><span class="nx">limit</span><span class="err">条数据</span>
-<span class="nx">MongoCursor</span><span class="o">&lt;</span><span class="nb">Document</span><span class="o">&gt;</span> <span class="n">mongoCursor</span> <span class="o">=</span> <span class="nx">collection.find</span><span class="p">(</span><span class="nx">query</span><span class="p">)</span><span class="bp">.</span><span class="nx">limit</span><span class="p">(</span> <span class="nx">limit</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">?</span> <span class="nx">limit</span><span class="p">:</span><span class="mi">0</span><span class="p">)</span><span class="bp">.</span><span class="nb">iterator</span><span class="p">();</span>
-</pre></div>
-
-
-<h3>其他</h3>
-<p>清空表</p>
-<div class="highlight"><pre><span class="n">collection</span><span class="p">.</span><span class="n">drop</span><span class="p">();</span>
-</pre></div>
-
-
-<p>删除数据库</p>
-<div class="highlight"><pre><span class="n">database</span><span class="p">.</span><span class="n">drop</span><span class="p">();</span>
-</pre></div>
-
-
-<p>释放资源</p>
-<div class="highlight"><pre><span class="n">mongoClient</span><span class="p">.</span><span class="n">close</span><span class="p">();</span>
-</pre></div>
-
-
-<h3>将数据对象转成document对象</h3>
-<div class="highlight"><pre><span class="kt">void</span> <span class="n">Document</span> <span class="nf">makeDocument</span><span class="p">(</span><span class="n">Person</span> <span class="n">data</span><span class="p">){</span>
-    <span class="n">String</span> <span class="n">name</span> <span class="o">=</span> <span class="n">data</span><span class="p">.</span><span class="n">getName</span><span class="p">();</span>
-    <span class="kt">int</span> <span class="n">age</span> <span class="o">=</span> <span class="n">data</span><span class="p">.</span><span class="n">getAge</span><span class="p">();</span>
-    <span class="n">Double</span> <span class="n">x</span> <span class="o">=</span> <span class="n">data</span><span class="p">.</span><span class="n">getX</span><span class="p">();</span>
-    <span class="n">Double</span> <span class="n">y</span> <span class="o">=</span> <span class="n">data</span><span class="p">.</span><span class="n">getY</span><span class="p">();</span>
-    <span class="cm">/*</span>
-<span class="cm">    Document doc = new Document(&quot;name&quot;, &quot;Yang&quot;)</span>
-<span class="cm">                .append(&quot;age&quot;, 25)</span>
-<span class="cm">                .append(&quot;city&quot;, &quot;Shanghai&quot;)</span>
-<span class="cm">                .append(&quot;loc&quot;, new Document(&quot;x&quot;, x).append(&quot;y&quot;, y)); </span>
-<span class="cm">    */</span>
-    <span class="n">Document</span> <span class="n">doc</span> <span class="o">=</span> <span class="n">new</span> <span class="n">Document</span><span class="p">(</span><span class="s">&quot;name&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
-                    <span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;age&quot;</span><span class="p">,</span> <span class="n">age</span><span class="p">)</span>
-                    <span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;loc&quot;</span><span class="p">,</span> <span class="n">new</span> <span class="n">BsonArray</span><span class="p">(</span><span class="n">Arrays</span><span class="p">.</span><span class="n">asList</span><span class="p">(</span><span class="n">new</span> <span class="n">BsonDouble</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">new</span> <span class="n">BsonDouble</span><span class="p">(</span><span class="n">y</span><span class="p">))));</span>                     
-    <span class="k">return</span> <span class="n">doc</span><span class="p">;</span>
-<span class="p">}</span>
-</pre></div>
-
-
-<h3>将document对象转成数据对象</h3>
-<div class="highlight"><pre><span class="kt">void</span> <span class="n">Person</span> <span class="nf">parseDocument</span><span class="p">(</span><span class="n">Document</span> <span class="n">doc</span><span class="p">){</span>
-    <span class="n">String</span> <span class="n">name</span> <span class="o">=</span> <span class="n">doc</span><span class="p">.</span><span class="n">getString</span><span class="p">(</span><span class="s">&quot;name&quot;</span><span class="p">);</span>
-    <span class="n">Integer</span> <span class="n">age</span> <span class="o">=</span> <span class="n">doc</span><span class="p">.</span><span class="n">getInteger</span><span class="p">(</span><span class="s">&quot;age&quot;</span><span class="p">);</span>
-    <span class="n">String</span> <span class="n">city</span> <span class="o">=</span> <span class="n">doc</span><span class="p">.</span><span class="n">getString</span><span class="p">(</span><span class="s">&quot;city&quot;</span><span class="p">);</span>
-    <span class="cm">/*</span>
-<span class="cm">    Document docLoc = (Document)doc.get(&quot;loc&quot;);</span>
-<span class="cm">    Double x = (Document)docLoc.get(&quot;x&quot;);</span>
-<span class="cm">    Double y = (Document)docLoc.get(&quot;y&quot;);</span>
-<span class="cm">    */</span>  
-    <span class="n">List</span> <span class="n">array</span> <span class="o">=</span> <span class="p">(</span><span class="n">List</span><span class="p">)</span><span class="n">doc</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;loc&quot;</span><span class="p">);</span>
-    <span class="n">Double</span> <span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">Double</span><span class="p">)</span><span class="n">array</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
-    <span class="n">Double</span> <span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="n">Double</span><span class="p">)</span><span class="n">array</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
-    <span class="k">return</span> <span class="n">new</span> <span class="n">Person</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">age</span><span class="p">,</span> <span class="n">city</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">);</span>
-<span class="p">}</span>
-</pre></div>
-
-
-<p>相关链接请参考</p>
-<p>http://mongodb.github.io/mongo-java-driver/3.0/driver/getting-started/quick-tour/</p>
-<p>https://github.com/mongodb/mongo-java-driver/blob/3.0.x/driver/src/examples/tour/QuickTour.java</p></div>
-        <hr />
-    </div>
-		
+<h2>MongoDB的增、删、改 ...</h2> <a class="btn btn-info xsmall" href="../pages/2016/07/20/mongodbru-men.html">read more</a></div>
+    </div>	
+				
 
  
         
